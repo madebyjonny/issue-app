@@ -40,6 +40,7 @@ A Linear-inspired issue tracker built with Laravel. Manage projects, track ticke
 ### 1. Install & setup
 
 ```bash
+git clone <repo-url> && cd issues-app
 composer run setup
 ```
 
