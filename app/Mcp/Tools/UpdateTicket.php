@@ -38,6 +38,10 @@ class UpdateTicket extends Tool
             $updates['sprint_id'] = $request->get('sprint_id') === 0 ? null : $request->get('sprint_id');
         }
 
+        if ($request->get('epic_id') !== null) {
+            $updates['epic_id'] = $request->get('epic_id') === 0 ? null : $request->get('epic_id');
+        }
+
         if ($columnName = $request->get('column_name')) {
             $column = $ticket->project->columns->firstWhere('name', $columnName);
             if ($column) {
@@ -72,6 +76,7 @@ class UpdateTicket extends Tool
             'column_name' => $schema->string()->description('Move to column by name')->nullable(),
             'assignee_id' => $schema->integer()->description('Assign to user ID (0 to unassign)')->nullable(),
             'sprint_id' => $schema->integer()->description('Set sprint ID (0 to remove)')->nullable(),
+            'epic_id' => $schema->integer()->description('Set epic ID (0 to remove)')->nullable(),
             'priority' => $schema->string()->description('Priority level')->enum(['none', 'low', 'medium', 'high', 'urgent'])->nullable(),
             'type' => $schema->string()->description('Ticket type')->enum(['task', 'bug', 'feature', 'improvement'])->nullable(),
             'estimate' => $schema->integer()->description('Estimate points')->nullable(),

@@ -6,6 +6,7 @@ use App\Mcp\Tools\CreateTicket;
 use App\Mcp\Tools\DeleteTicket;
 use App\Mcp\Tools\GetSprintBoard;
 use App\Mcp\Tools\GetTicket;
+use App\Mcp\Tools\ListEpics;
 use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\ListTickets;
 use App\Mcp\Tools\MyTickets;
@@ -29,6 +30,7 @@ class Issues extends Server
         DeleteTicket::class,
         MyTickets::class,
         GetSprintBoard::class,
+        ListEpics::class,
     ];
 
     protected array $resources = [

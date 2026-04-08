@@ -1,5 +1,4 @@
-<x-app-layout>
-    <x-slot name="project">{{ $project }}</x-slot>
+<x-app-layout :project="$project">
 
     <x-slot name="header">
         <div class="flex items-center gap-2.5">
@@ -23,6 +22,29 @@
                 @foreach($project->members as $member)
                     <option value="{{ $member->id }}" {{ request('assignee') == $member->id ? 'selected' : '' }}>
                         {{ $member->name }}
+                    </option>
+                @endforeach
+            </select>
+            <select id="priority-filter" onchange="applyFilters()" class="bg-[#1f1f23] border border-white/[0.08] text-gray-300 text-[11px] px-2 py-1 rounded-md focus:border-accent/50 focus:ring-0 transition">
+                <option value="">All priorities</option>
+                <option value="urgent" {{ request('priority') == 'urgent' ? 'selected' : '' }}>Urgent</option>
+                <option value="high" {{ request('priority') == 'high' ? 'selected' : '' }}>High</option>
+                <option value="medium" {{ request('priority') == 'medium' ? 'selected' : '' }}>Medium</option>
+                <option value="low" {{ request('priority') == 'low' ? 'selected' : '' }}>Low</option>
+                <option value="none" {{ request('priority') == 'none' ? 'selected' : '' }}>None</option>
+            </select>
+            <select id="type-filter" onchange="applyFilters()" class="bg-[#1f1f23] border border-white/[0.08] text-gray-300 text-[11px] px-2 py-1 rounded-md focus:border-accent/50 focus:ring-0 transition">
+                <option value="">All types</option>
+                <option value="task" {{ request('type') == 'task' ? 'selected' : '' }}>Task</option>
+                <option value="bug" {{ request('type') == 'bug' ? 'selected' : '' }}>Bug</option>
+                <option value="feature" {{ request('type') == 'feature' ? 'selected' : '' }}>Feature</option>
+                <option value="improvement" {{ request('type') == 'improvement' ? 'selected' : '' }}>Improvement</option>
+            </select>
+            <select id="epic-filter" onchange="applyFilters()" class="bg-[#1f1f23] border border-white/[0.08] text-gray-300 text-[11px] px-2 py-1 rounded-md focus:border-accent/50 focus:ring-0 transition">
+                <option value="">All epics</option>
+                @foreach($project->epics as $epic)
+                    <option value="{{ $epic->id }}" {{ request('epic') == $epic->id ? 'selected' : '' }}>
+                        {{ $epic->name }}
                     </option>
                 @endforeach
             </select>
@@ -98,61 +120,89 @@
 
     {{-- Linear-inspired Dialog --}}
     <dialog id="ticket-dialog" class="backdrop:bg-black/80 backdrop:backdrop-blur-sm bg-transparent p-0 m-0 fixed inset-0 w-full h-full max-w-none max-h-none">
-        <div class="fixed inset-0 flex items-start justify-center pt-[10vh] p-4 pointer-events-none">
-            <div class="bg-[#1a1a1e] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/60 w-full max-w-2xl pointer-events-auto flex flex-col">
-                <form id="ticket-form" method="POST" action="" class="flex flex-col">
+        <div class="fixed inset-0 flex items-start justify-center pt-[8vh] p-4 pointer-events-none">
+            <div class="bg-[#1a1a1e] border border-white/[0.12] rounded-xl shadow-2xl shadow-black/60 w-full max-w-3xl pointer-events-auto flex flex-col max-h-[80vh]">
+                <form id="ticket-form" method="POST" action="" class="flex flex-col flex-1 min-h-0">
                     @csrf
                     <input type="hidden" name="_method" id="ticket-form-method" value="POST">
 
-                    {{-- Content --}}
-                    <div class="px-5 pt-5 pb-4 space-y-4">
-                        {{-- Title --}}
-                        <input type="text" name="title" id="ticket-title" placeholder="Issue title" required
-                               class="w-full bg-transparent border-0 text-[18px] font-semibold text-white placeholder-gray-500 focus:ring-0 p-0 focus:outline-none" />
+                    <div class="flex flex-1 min-h-0">
+                        {{-- Left: Content --}}
+                        <div class="flex-1 px-5 pt-5 pb-4 space-y-4 overflow-y-auto">
+                            <input type="text" name="title" id="ticket-title" placeholder="Issue title" required
+                                   class="w-full bg-transparent border-0 text-[18px] font-semibold text-white placeholder-gray-500 focus:ring-0 p-0 focus:outline-none" />
 
-                        {{-- Description --}}
-                        <textarea name="description" id="ticket-description" rows="12" placeholder="Add description..."
-                                  class="w-full bg-transparent border-0 text-[14px] text-gray-300 placeholder-gray-500 focus:ring-0 p-0 resize-none focus:outline-none leading-relaxed"></textarea>
+                            <textarea name="description" id="ticket-description" rows="14" placeholder="Add description..."
+                                      class="w-full bg-transparent border-0 text-[14px] text-gray-300 placeholder-gray-500 focus:ring-0 p-0 resize-none focus:outline-none leading-relaxed"></textarea>
+                        </div>
 
-                        {{-- Properties row --}}
-                        <div class="flex flex-wrap items-center gap-1.5 pt-3 border-t border-white/[0.08]">
-                            <select name="column_id" id="ticket-column" class="bg-[#252529] border border-white/[0.08] text-gray-200 text-[12px] pl-2.5 pr-7 py-1.5 rounded-md focus:border-accent/50 focus:ring-0 transition cursor-pointer hover:border-white/[0.15]">
-                                @foreach($project->columns as $col)
-                                    <option value="{{ $col->id }}">{{ $col->name }}</option>
-                                @endforeach
-                            </select>
+                        {{-- Right: Properties sidebar --}}
+                        <div class="w-52 border-l border-white/[0.08] p-4 space-y-3 overflow-y-auto bg-[#151518]/50 flex-shrink-0">
+                            <div>
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Status</label>
+                                <select name="column_id" id="ticket-column" class="w-full input-dark text-[12px] px-2 py-1.5">
+                                    @foreach($project->columns as $col)
+                                        <option value="{{ $col->id }}">{{ $col->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                            <select name="priority" id="ticket-priority" class="bg-[#252529] border border-white/[0.08] text-gray-200 text-[12px] pl-2.5 pr-7 py-1.5 rounded-md focus:border-accent/50 focus:ring-0 transition cursor-pointer hover:border-white/[0.15]">
-                                <option value="none">No priority</option>
-                                <option value="low">Low</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
-                            </select>
+                            <div>
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Priority</label>
+                                <select name="priority" id="ticket-priority" class="w-full input-dark text-[12px] px-2 py-1.5">
+                                    <option value="none">None</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
 
-                            <select name="assignee_id" id="ticket-assignee" class="bg-[#252529] border border-white/[0.08] text-gray-200 text-[12px] pl-2.5 pr-7 py-1.5 rounded-md focus:border-accent/50 focus:ring-0 transition cursor-pointer hover:border-white/[0.15]">
-                                <option value="">Assignee</option>
-                                @foreach($project->members as $member)
-                                    <option value="{{ $member->id }}">{{ $member->name }}</option>
-                                @endforeach
-                            </select>
+                            <div>
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Assignee</label>
+                                <select name="assignee_id" id="ticket-assignee" class="w-full input-dark text-[12px] px-2 py-1.5">
+                                    <option value="">Unassigned</option>
+                                    @foreach($project->members as $member)
+                                        <option value="{{ $member->id }}">{{ $member->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                            <select name="type" id="ticket-type" class="bg-[#252529] border border-white/[0.08] text-gray-200 text-[12px] pl-2.5 pr-7 py-1.5 rounded-md focus:border-accent/50 focus:ring-0 transition cursor-pointer hover:border-white/[0.15]">
-                                <option value="task">Task</option>
-                                <option value="bug">Bug</option>
-                                <option value="feature">Feature</option>
-                                <option value="improvement">Improvement</option>
-                            </select>
+                            <div>
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Type</label>
+                                <select name="type" id="ticket-type" class="w-full input-dark text-[12px] px-2 py-1.5">
+                                    <option value="task">Task</option>
+                                    <option value="bug">Bug</option>
+                                    <option value="feature">Feature</option>
+                                    <option value="improvement">Improvement</option>
+                                </select>
+                            </div>
 
-                            <select name="sprint_id" id="ticket-sprint" class="bg-[#252529] border border-white/[0.08] text-gray-200 text-[12px] pl-2.5 pr-7 py-1.5 rounded-md focus:border-accent/50 focus:ring-0 transition cursor-pointer hover:border-white/[0.15]">
-                                <option value="">Sprint</option>
-                                @foreach($project->sprints as $sprint)
-                                    <option value="{{ $sprint->id }}">{{ $sprint->name }}</option>
-                                @endforeach
-                            </select>
+                            <div>
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Sprint</label>
+                                <select name="sprint_id" id="ticket-sprint" class="w-full input-dark text-[12px] px-2 py-1.5">
+                                    <option value="">No sprint</option>
+                                    @foreach($project->sprints as $sprint)
+                                        <option value="{{ $sprint->id }}">{{ $sprint->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                            <input type="number" name="estimate" id="ticket-estimate" min="0" placeholder="Pts"
-                                   class="bg-[#252529] border border-white/[0.08] text-gray-200 text-[12px] px-2.5 py-1.5 rounded-md w-16 focus:border-accent/50 focus:ring-0 transition placeholder-gray-500 hover:border-white/[0.15]" />
+                            <div>
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Epic</label>
+                                <select name="epic_id" id="ticket-epic" class="w-full input-dark text-[12px] px-2 py-1.5">
+                                    <option value="">No epic</option>
+                                    @foreach($project->epics as $epic)
+                                        <option value="{{ $epic->id }}">{{ $epic->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Estimate</label>
+                                <input type="number" name="estimate" id="ticket-estimate" min="0" placeholder="Points"
+                                       class="w-full input-dark text-[12px] px-2 py-1.5" />
+                            </div>
                         </div>
                     </div>
 
@@ -183,9 +233,15 @@
         function applyFilters() {
             const sprint = document.getElementById('sprint-filter').value;
             const assignee = document.getElementById('assignee-filter').value;
+            const priority = document.getElementById('priority-filter').value;
+            const type = document.getElementById('type-filter').value;
+            const epic = document.getElementById('epic-filter').value;
             const params = new URLSearchParams();
             if (sprint) params.set('sprint', sprint);
             if (assignee) params.set('assignee', assignee);
+            if (priority) params.set('priority', priority);
+            if (type) params.set('type', type);
+            if (epic) params.set('epic', epic);
             window.location.href = `/projects/${projectId}/board` + (params.toString() ? '?' + params : '');
         }
 
@@ -202,6 +258,7 @@
             document.getElementById('ticket-priority').value = 'none';
             document.getElementById('ticket-type').value = 'task';
             document.getElementById('ticket-sprint').value = '';
+            document.getElementById('ticket-epic').value = '';
             document.getElementById('ticket-estimate').value = '';
             if (columnId) document.getElementById('ticket-column').value = columnId;
             dialog.showModal();
@@ -225,6 +282,7 @@
             document.getElementById('ticket-priority').value = ticket.priority;
             document.getElementById('ticket-type').value = ticket.type;
             document.getElementById('ticket-sprint').value = ticket.sprint_id || '';
+            document.getElementById('ticket-epic').value = ticket.epic_id || '';
             document.getElementById('ticket-estimate').value = ticket.estimate || '';
             dialog.showModal();
         }

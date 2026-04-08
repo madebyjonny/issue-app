@@ -8,8 +8,9 @@ A Linear-inspired issue tracker built with Laravel. Manage projects, track ticke
 - **Kanban Board** — Drag-and-drop tickets across fully customizable, reorderable columns.
 - **Tickets** — Issues auto-generate identifiers in `KEY-N` format with title, description, priority (urgent/high/medium/low/none), type (bug/feature/improvement/task), assignee, sprint, and story point estimate.
 - **Sprints** — Create and manage sprints per project with active sprint tracking.
+- **Epics** — Group related issues under a shared goal with color-coded progress tracking. Create tickets directly from the epic view.
 - **Filters** — Filter the board by sprint and assignee.
-- **MCP Server** — Exposes an AI-accessible `Issues` server with tools: `ListProjects`, `ListTickets`, `GetTicket`, `CreateTicket`, `UpdateTicket`, `DeleteTicket`, `MyTickets`, `GetSprintBoard`.
+- **MCP Server** — Exposes an AI-accessible `Issues` server with tools: `ListProjects`, `ListTickets`, `GetTicket`, `CreateTicket`, `UpdateTicket`, `DeleteTicket`, `MyTickets`, `GetSprintBoard`, `ListEpics`.
 
 ## Tech Stack
 

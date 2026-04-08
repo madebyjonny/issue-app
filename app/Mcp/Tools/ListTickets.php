@@ -14,7 +14,7 @@ class ListTickets extends Tool
 {
     public function handle(Request $request): Response
     {
-        $query = Ticket::with(['project', 'column', 'assignee', 'sprint']);
+        $query = Ticket::with(['project', 'column', 'assignee', 'sprint', 'epic']);
 
         if ($key = $request->get('project_key')) {
             $query->whereHas('project', fn ($q) => $q->where('key', strtoupper($key)));
@@ -40,6 +40,10 @@ class ListTickets extends Tool
             $query->whereHas('sprint', fn ($q) => $q->where('is_active', true));
         }
 
+        if ($epicId = $request->get('epic_id')) {
+            $query->where('epic_id', $epicId);
+        }
+
         $tickets = $query->orderBy('position')->get()->map(fn ($t) => [
             'identifier' => $t->identifier,
             'title' => $t->title,
@@ -47,6 +51,7 @@ class ListTickets extends Tool
             'column' => $t->column->name,
             'assignee' => $t->assignee?->name,
             'sprint' => $t->sprint?->name,
+            'epic' => $t->epic?->name,
             'priority' => $t->priority,
             'type' => $t->type,
         ]);
@@ -67,6 +72,7 @@ class ListTickets extends Tool
             'column_id' => $schema->integer()->description('Filter by column ID')->nullable(),
             'priority' => $schema->string()->description('Filter by priority')->enum(['none', 'low', 'medium', 'high', 'urgent'])->nullable(),
             'active_sprint' => $schema->boolean()->description('Only show tickets in the active sprint')->nullable(),
+            'epic_id' => $schema->integer()->description('Filter by epic ID')->nullable(),
         ];
     }
 }

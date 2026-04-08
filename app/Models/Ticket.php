@@ -9,7 +9,7 @@ class Ticket extends Model
 {
     protected $fillable = [
         'identifier', 'title', 'description', 'project_id', 'column_id',
-        'assignee_id', 'reporter_id', 'sprint_id', 'priority', 'type',
+        'assignee_id', 'reporter_id', 'sprint_id', 'epic_id', 'priority', 'type',
         'position', 'estimate',
     ];
 
@@ -36,6 +36,11 @@ class Ticket extends Model
     public function sprint(): BelongsTo
     {
         return $this->belongsTo(Sprint::class);
+    }
+
+    public function epic(): BelongsTo
+    {
+        return $this->belongsTo(Epic::class);
     }
 
     protected static function booted(): void

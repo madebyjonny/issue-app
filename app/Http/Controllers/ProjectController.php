@@ -44,7 +44,7 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         $this->authorizeProject($project);
-        $project->load(['columns.tickets.assignee', 'members', 'sprints']);
+        $project->load(['columns.tickets.assignee', 'members', 'sprints', 'epics.tickets']);
 
         return view('projects.show', compact('project'));
     }
