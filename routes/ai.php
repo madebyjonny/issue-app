@@ -3,4 +3,7 @@
 use App\Mcp\Servers\Issues;
 use Laravel\Mcp\Facades\Mcp;
 
-Mcp::web('/mcp', Issues::class);
+Mcp::oauthRoutes();
+
+Mcp::web('/mcp', Issues::class)
+    ->middleware('auth:api');

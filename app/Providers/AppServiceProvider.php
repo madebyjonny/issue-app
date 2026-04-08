@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Project;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Passport::authorizationView(function ($parameters) {
+            return view('mcp.authorize', $parameters);
+        });
+
         View::composer('layouts.app', function ($view) {
             if (auth()->check()) {
                 $view->with('sidebarProjects', Project::where('owner_id', auth()->id())
