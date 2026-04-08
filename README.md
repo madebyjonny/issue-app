@@ -61,6 +61,7 @@ The app exposes an MCP (Model Context Protocol) server at `/mcp` that lets AI ag
 | `MyTickets`      | List tickets assigned to the current user                    |
 | `GetSprintBoard` | Get the board state for a sprint                             |
 | `ListEpics`      | List epics for a project                                     |
+| `CreateEpic`     | Create a new epic in a project                               |
 
 ### Connecting Locally
 
