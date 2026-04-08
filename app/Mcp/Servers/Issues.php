@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Tools\CreateEpic;
 use App\Mcp\Tools\CreateTicket;
 use App\Mcp\Tools\DeleteTicket;
 use App\Mcp\Tools\GetSprintBoard;
@@ -33,6 +34,7 @@ class Issues extends Server
         Me::class,
         GetSprintBoard::class,
         ListEpics::class,
+        CreateEpic::class,
     ];
 
     protected array $resources = [
