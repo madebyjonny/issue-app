@@ -10,6 +10,7 @@ use App\Mcp\Tools\GetTicket;
 use App\Mcp\Tools\ListEpics;
 use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\ListTickets;
+use App\Mcp\Tools\Me;
 use App\Mcp\Tools\MyTickets;
 use App\Mcp\Tools\UpdateTicket;
 use Laravel\Mcp\Server;
@@ -30,6 +31,7 @@ class Issues extends Server
         UpdateTicket::class,
         DeleteTicket::class,
         MyTickets::class,
+        Me::class,
         GetSprintBoard::class,
         ListEpics::class,
         CreateEpic::class,
