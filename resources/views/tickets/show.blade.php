@@ -1,5 +1,4 @@
-<x-app-layout>
-    <x-slot name="project">{{ $project }}</x-slot>
+<x-app-layout :project="$project">
 
     <x-slot name="header">
         <div class="flex items-center gap-2.5">
@@ -18,13 +17,13 @@
                 @method('PUT')
 
                 <div>
-                    <input type="text" name="title" value="{{ $ticket->title }}"
-                           class="w-full bg-transparent border-0 text-xl font-semibold text-white focus:ring-0 p-0 placeholder-gray-600" />
+                    <input type="text" name="title" value="{{ $ticket->title }}" placeholder="Issue title"
+                           class="w-full bg-transparent border-0 text-[18px] font-semibold text-white focus:ring-0 p-0 focus:outline-none placeholder-gray-500" />
                 </div>
 
                 <div>
-                    <textarea name="description" rows="20" placeholder="Add a description..."
-                              class="w-full input-dark p-4 resize-none">{{ $ticket->description }}</textarea>
+                    <textarea name="description" rows="20" placeholder="Add description..."
+                              class="w-full bg-transparent border-0 text-[14px] text-gray-300 placeholder-gray-500 focus:ring-0 p-0 resize-none focus:outline-none leading-relaxed">{{ $ticket->description }}</textarea>
                 </div>
 
                 <x-primary-button>Save Changes</x-primary-button>
@@ -86,6 +85,23 @@
                                 <option value="{{ $sprint->id }}" {{ $ticket->sprint_id == $sprint->id ? 'selected' : '' }}>{{ $sprint->name }}</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Epic</label>
+                        <select name="epic_id" onchange="document.getElementById('meta-form').submit()" class="w-full input-dark text-[12px] px-2 py-1.5">
+                            <option value="">No epic</option>
+                            @foreach($project->epics as $epic)
+                                <option value="{{ $epic->id }}" {{ $ticket->epic_id == $epic->id ? 'selected' : '' }}>{{ $epic->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-1.5">Estimate</label>
+                        <input type="number" name="estimate" min="0" placeholder="Points" value="{{ $ticket->estimate }}"
+                               onchange="document.getElementById('meta-form').submit()"
+                               class="w-full input-dark text-[12px] px-2 py-1.5" />
                     </div>
                 </div>
             </form>

@@ -1,5 +1,4 @@
-<x-app-layout>
-    <x-slot name="project">{{ $project }}</x-slot>
+<x-app-layout :project="$project">
 
     <x-slot name="header">
         <div class="flex items-center gap-3">

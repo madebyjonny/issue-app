@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\ColumnController;
+use App\Http\Controllers\EpicController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SprintController;
@@ -45,6 +46,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects/{project}/sprints', [SprintController::class, 'store'])->name('sprints.store');
     Route::put('/projects/{project}/sprints/{sprint}', [SprintController::class, 'update'])->name('sprints.update');
     Route::delete('/projects/{project}/sprints/{sprint}', [SprintController::class, 'destroy'])->name('sprints.destroy');
+
+    // Epics
+    Route::get('/projects/{project}/epics', [EpicController::class, 'index'])->name('epics.index');
+    Route::post('/projects/{project}/epics', [EpicController::class, 'store'])->name('epics.store');
+    Route::get('/projects/{project}/epics/{epic}', [EpicController::class, 'show'])->name('epics.show');
+    Route::put('/projects/{project}/epics/{epic}', [EpicController::class, 'update'])->name('epics.update');
+    Route::delete('/projects/{project}/epics/{epic}', [EpicController::class, 'destroy'])->name('epics.destroy');
+    Route::post('/projects/{project}/epics/{epic}/tickets', [EpicController::class, 'createTicket'])->name('epics.tickets.store');
 });
 
 require __DIR__.'/auth.php';

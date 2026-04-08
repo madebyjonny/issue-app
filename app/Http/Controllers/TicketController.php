@@ -16,6 +16,7 @@ class TicketController extends Controller
             'column_id' => ['required', 'exists:columns,id'],
             'assignee_id' => ['nullable', 'exists:users,id'],
             'sprint_id' => ['nullable', 'exists:sprints,id'],
+            'epic_id' => ['nullable', 'exists:epics,id'],
             'priority' => ['required', 'in:none,low,medium,high,urgent'],
             'type' => ['required', 'in:task,bug,feature,improvement'],
             'estimate' => ['nullable', 'integer', 'min:0'],
@@ -34,8 +35,8 @@ class TicketController extends Controller
 
     public function show(Project $project, Ticket $ticket)
     {
-        $ticket->load(['assignee', 'reporter', 'column', 'sprint']);
-        $project->load(['columns', 'members', 'sprints']);
+        $ticket->load(['assignee', 'reporter', 'column', 'sprint', 'epic']);
+        $project->load(['columns', 'members', 'sprints', 'epics']);
 
         return view('tickets.show', compact('project', 'ticket'));
     }
@@ -48,6 +49,7 @@ class TicketController extends Controller
             'column_id' => ['sometimes', 'required', 'exists:columns,id'],
             'assignee_id' => ['nullable', 'exists:users,id'],
             'sprint_id' => ['nullable', 'exists:sprints,id'],
+            'epic_id' => ['nullable', 'exists:epics,id'],
             'priority' => ['sometimes', 'required', 'in:none,low,medium,high,urgent'],
             'type' => ['sometimes', 'required', 'in:task,bug,feature,improvement'],
             'estimate' => ['nullable', 'integer', 'min:0'],
@@ -64,9 +66,14 @@ class TicketController extends Controller
 
     public function destroy(Project $project, Ticket $ticket)
     {
+        $epicId = $ticket->epic_id;
         $ticket->delete();
 
-        return back()->with('success', 'Ticket deleted.');
+        if ($epicId) {
+            return redirect()->route('epics.show', [$project, $epicId])->with('success', 'Ticket deleted.');
+        }
+
+        return redirect()->route('projects.board', $project)->with('success', 'Ticket deleted.');
     }
 
     public function move(Request $request, Project $project, Ticket $ticket)
