@@ -26,7 +26,7 @@ class ProjectMemberController extends Controller
             $user = User::create([
                 'name'     => $validated['name'],
                 'email'    => $validated['email'],
-                'password' => bcrypt($validated['password']),
+                'password' => $validated['password'],
             ]);
         }
 
