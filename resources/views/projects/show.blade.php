@@ -128,18 +128,50 @@
                 <p class="section-title">Members</p>
                 <p class="section-desc">People on this project.</p>
             </div>
-            <div class="flex-1 card overflow-hidden divide-y divide-white/[0.04]">
-                @foreach($project->members as $member)
-                    <div class="flex items-center gap-3 px-5 py-3">
-                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-accent/30 to-accent/10 flex items-center justify-center text-[11px] font-semibold text-accent ring-1 ring-white/[0.06]">
-                            {{ strtoupper(substr($member->name, 0, 1)) }}
+            <div class="flex-1 card overflow-hidden">
+                <div class="divide-y divide-white/[0.04]">
+                    @foreach($project->members as $member)
+                        <div class="flex items-center gap-3 px-5 py-3 group">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-accent/30 to-accent/10 flex items-center justify-center text-[11px] font-semibold text-accent ring-1 ring-white/[0.06]">
+                                {{ strtoupper(substr($member->name, 0, 1)) }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <span class="text-[13px] text-gray-300">{{ $member->name }}</span>
+                                <span class="text-[12px] text-gray-600 ml-2">{{ $member->email }}</span>
+                            </div>
+                            <span class="text-[12px] text-gray-600 capitalize">{{ $member->pivot->role }}</span>
+                            @if($project->owner_id === auth()->id() && $member->pivot->role !== 'owner')
+                                <form method="POST" action="{{ route('projects.members.destroy', [$project, $member]) }}" class="opacity-0 group-hover:opacity-100 transition">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-[12px] text-red-500/60 hover:text-red-400 transition" onclick="return confirm('Remove {{ $member->name }} from this project?')">Remove</button>
+                                </form>
+                            @endif
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <span class="text-[13px] text-gray-300">{{ $member->name }}</span>
+                    @endforeach
+                </div>
+
+                @if($project->owner_id === auth()->id())
+                    <form method="POST" action="{{ route('projects.members.store', $project) }}" class="border-t border-white/[0.04] px-5 py-4 space-y-3" x-data="{ expanded: {{ $errors->has('email') || $errors->has('name') || $errors->has('password') ? 'true' : 'false' }} }">
+                        @csrf
+                        <div class="flex items-center gap-3">
+                            <svg class="w-4 h-4 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                            <input type="email" name="email" placeholder="Add by email address..." value="{{ old('email') }}" required class="flex-1 bg-transparent border-0 text-[13px] text-gray-300 placeholder-gray-600 p-0 focus:ring-0" @focus="expanded = true" />
+                            <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition whitespace-nowrap">Add Member</button>
                         </div>
-                        <span class="text-[12px] text-gray-600 capitalize">{{ $member->pivot->role }}</span>
-                    </div>
-                @endforeach
+                        <div x-show="expanded" x-cloak class="grid grid-cols-2 gap-3 pl-7">
+                            <div>
+                                <input type="text" name="name" placeholder="Full name (if new user)" value="{{ old('name') }}" class="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent/40" />
+                                @error('name')<p class="mt-1 text-[11px] text-red-400">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <input type="password" name="password" placeholder="Password (if new user)" class="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent/40" />
+                                @error('password')<p class="mt-1 text-[11px] text-red-400">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                        @error('email')<p class="pl-7 text-[12px] text-red-400">{{ $message }}</p>@enderror
+                    </form>
+                @endif
             </div>
         </div>
 

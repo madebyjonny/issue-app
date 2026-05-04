@@ -5,6 +5,7 @@ use App\Http\Controllers\ColumnController;
 use App\Http\Controllers\EpicController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,10 @@ Route::middleware('auth')->group(function () {
 
     // Projects
     Route::resource('projects', ProjectController::class);
+
+    // Members
+    Route::post('/projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
+    Route::delete('/projects/{project}/members/{user}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
 
     // Board
     Route::get('/projects/{project}/board', [BoardController::class, 'show'])->name('projects.board');
