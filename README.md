@@ -23,6 +23,7 @@ A Linear-inspired issue tracker built with Laravel. Manage projects, track ticke
 | `UpdateTicket`   | Update an existing ticket                       |
 | `DeleteTicket`   | Delete a ticket                                 |
 | `MyTickets`      | List tickets assigned to the authenticated user |
+| `Me`             | Get the currently authenticated user's info     |
 | `GetSprintBoard` | Get the board state for a sprint                |
 | `ListEpics`      | List epics for a project                        |
 | `CreateEpic`     | Create a new epic                               |
