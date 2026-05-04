@@ -12,7 +12,7 @@ class ProjectMemberController extends Controller
     {
         $this->authorizeOwner($project);
 
-        $existing = User::where('email', $request->email)->first();
+        $existing = User::where('email', strtolower(trim($request->email)))->first();
 
         $validated = $request->validate([
             'email'    => ['required', 'email', 'max:255'],
@@ -25,7 +25,7 @@ class ProjectMemberController extends Controller
         } else {
             $user = User::create([
                 'name'     => $validated['name'],
-                'email'    => $validated['email'],
+                'email'    => strtolower(trim($validated['email'])),
                 'password' => $validated['password'],
             ]);
         }
