@@ -3,16 +3,19 @@
 namespace App\Mcp\Servers;
 
 use App\Mcp\Tools\CreateEpic;
+use App\Mcp\Tools\CreateProjectResource;
 use App\Mcp\Tools\CreateTicket;
 use App\Mcp\Tools\DeleteTicket;
 use App\Mcp\Tools\GetSprintBoard;
 use App\Mcp\Tools\GetTicket;
 use App\Mcp\Tools\ListEpics;
+use App\Mcp\Tools\ListProjectResources;
 use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\ListTickets;
 use App\Mcp\Tools\Me;
 use App\Mcp\Tools\MyTickets;
 use App\Mcp\Tools\UpdateTicket;
+use App\Mcp\Tools\UpdateTicketResources;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
@@ -35,6 +38,9 @@ class Issues extends Server
         GetSprintBoard::class,
         ListEpics::class,
         CreateEpic::class,
+        ListProjectResources::class,
+        CreateProjectResource::class,
+        UpdateTicketResources::class,
     ];
 
     protected array $resources = [
