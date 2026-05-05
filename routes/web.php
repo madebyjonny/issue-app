@@ -6,6 +6,7 @@ use App\Http\Controllers\EpicController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\ProjectResourceController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,13 @@ Route::middleware('auth')->group(function () {
     // Members
     Route::post('/projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
     Route::delete('/projects/{project}/members/{user}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
+
+    // Resources
+    Route::post('/projects/{project}/resources', [ProjectResourceController::class, 'store'])->name('projects.resources.store');
+    Route::put('/projects/{project}/resources/{resource}', [ProjectResourceController::class, 'update'])->name('projects.resources.update');
+    Route::delete('/projects/{project}/resources/{resource}', [ProjectResourceController::class, 'destroy'])->name('projects.resources.destroy');
+    Route::post('/projects/{project}/resources/{resource}/tickets', [ProjectResourceController::class, 'attachTicket'])->name('projects.resources.tickets.attach');
+    Route::delete('/projects/{project}/resources/{resource}/tickets/{ticket}', [ProjectResourceController::class, 'detachTicket'])->name('projects.resources.tickets.detach');
 
     // Board
     Route::get('/projects/{project}/board', [BoardController::class, 'show'])->name('projects.board');

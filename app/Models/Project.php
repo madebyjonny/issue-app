@@ -41,6 +41,11 @@ class Project extends Model
         return $this->hasMany(Epic::class);
     }
 
+    public function resources(): HasMany
+    {
+        return $this->hasMany(ProjectResource::class)->orderBy('type')->orderBy('name');
+    }
+
     public function activeSprint(): HasMany
     {
         return $this->hasMany(Sprint::class)->where('is_active', true);

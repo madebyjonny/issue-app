@@ -16,7 +16,7 @@ class GetTicket extends Tool
     {
         $identifier = strtoupper($request->get('identifier', ''));
 
-        $ticket = Ticket::with(['project', 'column', 'assignee', 'reporter', 'sprint'])
+        $ticket = Ticket::with(['project', 'column', 'assignee', 'reporter', 'sprint', 'resources'])
             ->where('identifier', $identifier)
             ->first();
 
@@ -43,6 +43,11 @@ class GetTicket extends Tool
             'estimate' => $ticket->estimate,
             'created_at' => $ticket->created_at->toIso8601String(),
             'updated_at' => $ticket->updated_at->toIso8601String(),
+            'resources' => $ticket->resources->map(fn ($r) => [
+                'name'    => $r->name,
+                'type'    => $r->type,
+                'content' => $r->content,
+            ])->values()->all(),
         ]);
     }
 

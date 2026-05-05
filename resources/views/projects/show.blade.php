@@ -175,6 +175,96 @@
             </div>
         </div>
 
+        {{-- Resources --}}
+        <div class="flex gap-8" x-data="{ editing: null, creating: false }">
+            <div class="w-48 flex-shrink-0 pt-5">
+                <p class="section-title">Resources</p>
+                <p class="section-desc">Skill cards given to AI agents working on tickets in this project.</p>
+            </div>
+            <div class="flex-1 space-y-2">
+                @foreach($project->resources as $resource)
+                    <div class="card overflow-hidden" x-data="{ open: false }">
+                        <div class="flex items-center gap-3 px-5 py-3 cursor-pointer group" @click="open = !open">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded
+                                @if($resource->type === 'design') bg-purple-500/15 text-purple-400
+                                @elseif($resource->type === 'development') bg-blue-500/15 text-blue-400
+                                @elseif($resource->type === 'api') bg-amber-500/15 text-amber-400
+                                @else bg-gray-500/15 text-gray-400 @endif">
+                                {{ $resource->type }}
+                            </span>
+                            <span class="flex-1 text-[13px] text-white">{{ $resource->name }}</span>
+                            <svg class="w-3.5 h-3.5 text-gray-600 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                        </div>
+
+                        <div x-show="open" x-cloak class="border-t border-white/[0.04]" x-data="{ editing: false }">
+                            {{-- View mode --}}
+                            <div x-show="!editing" class="px-5 py-4 space-y-3">
+                                <pre class="text-[12px] text-gray-400 whitespace-pre-wrap font-mono leading-relaxed">{{ $resource->content }}</pre>
+                                <div class="flex items-center gap-3 pt-1">
+                                    <button @click="editing = true" class="text-[12px] text-gray-500 hover:text-white transition">Edit</button>
+                                    <form method="POST" action="{{ route('projects.resources.destroy', [$project, $resource]) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-[12px] text-red-500/60 hover:text-red-400 transition" onclick="return confirm('Delete this resource?')">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {{-- Edit mode --}}
+                            <form method="POST" action="{{ route('projects.resources.update', [$project, $resource]) }}" x-show="editing" class="px-5 py-4 space-y-3">
+                                @csrf
+                                @method('PUT')
+                                <div>
+                                    <input type="text" name="name" value="{{ $resource->name }}" required class="w-full input-dark text-[13px] px-3 py-2" placeholder="Resource name" />
+                                </div>
+                                <div>
+                                    <select name="type" class="w-full input-dark text-[13px] px-3 py-2">
+                                        @foreach(['design', 'development', 'api', 'process'] as $t)
+                                            <option value="{{ $t }}" {{ $resource->type === $t ? 'selected' : '' }}>{{ ucfirst($t) }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <textarea name="content" rows="10" required class="w-full input-dark text-[12px] px-3 py-2 font-mono resize-y">{{ $resource->content }}</textarea>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition">Save</button>
+                                    <button type="button" @click="editing = false" class="text-[12px] text-gray-500 hover:text-white transition">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+
+                {{-- Create new resource --}}
+                <div class="card overflow-hidden">
+                    <div class="flex items-center gap-3 px-5 py-3 cursor-pointer" @click="creating = !creating">
+                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                        <span class="text-[13px] text-gray-500">Add resource...</span>
+                    </div>
+                    <form method="POST" action="{{ route('projects.resources.store', $project) }}" x-show="creating" x-cloak class="border-t border-white/[0.04] px-5 py-4 space-y-3">
+                        @csrf
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" name="name" required placeholder="Resource name" class="input-dark text-[13px] px-3 py-2" />
+                            <select name="type" class="input-dark text-[13px] px-3 py-2">
+                                <option value="design">Design</option>
+                                <option value="development">Development</option>
+                                <option value="api">API</option>
+                                <option value="process">Process</option>
+                            </select>
+                        </div>
+                        <div>
+                            <textarea name="content" rows="8" required placeholder="Write the resource content in plain text or markdown..." class="w-full input-dark text-[12px] px-3 py-2 font-mono resize-y"></textarea>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition">Create Resource</button>
+                            <button type="button" @click="creating = false" class="text-[12px] text-gray-500 hover:text-white transition">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         {{-- Danger Zone --}}
         <div class="flex gap-8">
             <div class="w-48 flex-shrink-0 pt-5">

@@ -203,6 +203,25 @@
                                 <input type="number" name="estimate" id="ticket-estimate" min="0" placeholder="Points"
                                        class="w-full input-dark text-[12px] px-2 py-1.5" />
                             </div>
+
+                            @if($project->resources->isNotEmpty())
+                            <div class="pt-3 border-t border-white/[0.06]">
+                                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-2">Resources</label>
+                                <div class="space-y-1" id="ticket-resources">
+                                    @foreach($project->resources as $resource)
+                                    <button type="button"
+                                            data-resource-id="{{ $resource->id }}"
+                                            data-attach-url="{{ route('projects.resources.tickets.attach', [$project, $resource]) }}"
+                                            data-attached="0"
+                                            onclick="toggleResource(this)"
+                                            class="resource-toggle flex items-center gap-2 w-full text-left px-2 py-1 rounded-lg transition text-gray-500 hover:text-gray-300 hover:bg-white/[0.04]">
+                                        <span class="resource-type-badge" style="font-size:10px;font-family:monospace;opacity:0.4">{{ substr($resource->type, 0, 3) }}</span>
+                                        <span style="font-size:12px" class="truncate">{{ $resource->name }}</span>
+                                    </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -228,7 +247,7 @@
     <script>
         const projectId = {{ $project->id }};
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-        const tickets = @json($project->columns->pluck('tickets')->flatten()->keyBy('id'));
+        const tickets = @json($project->columns->pluck('tickets')->flatten()->map(fn($t) => array_merge($t->toArray(), ['resource_ids' => $t->resources->pluck('id')->all()]))->keyBy('id'));
 
         function applyFilters() {
             const sprint = document.getElementById('sprint-filter').value;
@@ -246,6 +265,7 @@
         }
 
         function openCreateDialog(columnId = null) {
+            currentTicketId = null;
             const dialog = document.getElementById('ticket-dialog');
             const form = document.getElementById('ticket-form');
             form.action = `/projects/${projectId}/tickets`;
@@ -261,14 +281,18 @@
             document.getElementById('ticket-epic').value = '';
             document.getElementById('ticket-estimate').value = '';
             if (columnId) document.getElementById('ticket-column').value = columnId;
+            document.querySelectorAll('.resource-toggle').forEach(btn => setResourceActive(btn, false));
             dialog.showModal();
             document.getElementById('ticket-title').focus();
         }
+
+        let currentTicketId = null;
 
         function openTicketDialog(ticketId) {
             event.stopPropagation();
             const ticket = tickets[ticketId];
             if (!ticket) return;
+            currentTicketId = ticketId;
             const dialog = document.getElementById('ticket-dialog');
             const form = document.getElementById('ticket-form');
             form.action = `/projects/${projectId}/tickets/${ticketId}`;
@@ -284,7 +308,62 @@
             document.getElementById('ticket-sprint').value = ticket.sprint_id || '';
             document.getElementById('ticket-epic').value = ticket.epic_id || '';
             document.getElementById('ticket-estimate').value = ticket.estimate || '';
+
+            // Sync resource toggle state
+            const attachedIds = ticket.resource_ids || [];
+            document.querySelectorAll('.resource-toggle').forEach(btn => {
+                const rid = parseInt(btn.dataset.resourceId);
+                setResourceActive(btn, attachedIds.includes(rid));
+            });
+
             dialog.showModal();
+        }
+
+        function setResourceActive(btn, active) {
+            const badge = btn.querySelector('.resource-type-badge');
+            if (active) {
+                btn.classList.remove('text-gray-500', 'hover:text-gray-300', 'hover:bg-white/[0.04]');
+                btn.classList.add('bg-accent/15', 'text-accent', 'hover:bg-accent/20');
+                if (badge) badge.style.opacity = '0.8';
+                btn.dataset.attached = '1';
+            } else {
+                btn.classList.add('text-gray-500', 'hover:text-gray-300', 'hover:bg-white/[0.04]');
+                btn.classList.remove('bg-accent/15', 'text-accent', 'hover:bg-accent/20');
+                if (badge) badge.style.opacity = '0.4';
+                btn.dataset.attached = '0';
+            }
+        }
+
+        function toggleResource(btn) {
+            if (!currentTicketId) return;
+            const resourceId = btn.dataset.resourceId;
+            const attached = btn.dataset.attached === '1';
+            const ticket = tickets[currentTicketId];
+
+            if (attached) {
+                // Detach
+                const url = `/projects/${projectId}/resources/${resourceId}/tickets/${currentTicketId}`;
+                const body = new URLSearchParams({ _method: 'DELETE', _token: csrfToken });
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString(),
+                }).then(r => { if (r.ok || r.status === 302) {
+                    setResourceActive(btn, false);
+                    if (ticket) ticket.resource_ids = (ticket.resource_ids || []).filter(id => id !== parseInt(resourceId));
+                }});
+            } else {
+                // Attach
+                const body = new URLSearchParams({ _token: csrfToken, ticket_id: currentTicketId });
+                fetch(btn.dataset.attachUrl, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString(),
+                }).then(r => { if (r.ok || r.status === 302) {
+                    setResourceActive(btn, true);
+                    if (ticket) ticket.resource_ids = [...(ticket.resource_ids || []), parseInt(resourceId)];
+                }});
+            }
         }
 
         function deleteTicket() {

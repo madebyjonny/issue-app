@@ -35,8 +35,8 @@ class TicketController extends Controller
 
     public function show(Project $project, Ticket $ticket)
     {
-        $ticket->load(['assignee', 'reporter', 'column', 'sprint', 'epic']);
-        $project->load(['columns', 'members', 'sprints', 'epics']);
+        $ticket->load(['assignee', 'reporter', 'column', 'sprint', 'epic', 'resources']);
+        $project->load(['columns', 'members', 'sprints', 'epics', 'resources']);
 
         return view('tickets.show', compact('project', 'ticket'));
     }

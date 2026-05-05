@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Ticket extends Model
 {
@@ -41,6 +42,11 @@ class Ticket extends Model
     public function epic(): BelongsTo
     {
         return $this->belongsTo(Epic::class);
+    }
+
+    public function resources(): BelongsToMany
+    {
+        return $this->belongsToMany(ProjectResource::class);
     }
 
     protected static function booted(): void

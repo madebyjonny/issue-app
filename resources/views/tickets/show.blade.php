@@ -106,6 +106,36 @@
                 </div>
             </form>
 
+            {{-- Resources --}}
+            @if($project->resources->isNotEmpty())
+            <div class="pt-4 border-t border-white/[0.06]">
+                <label class="block text-[10px] font-semibold uppercase tracking-wider text-gray-600 mb-2">Resources</label>
+                <div class="space-y-1">
+                    @foreach($project->resources as $resource)
+                        @php $attached = $ticket->resources->contains($resource->id); @endphp
+                        <form method="POST"
+                              action="{{ $attached
+                                ? route('projects.resources.tickets.detach', [$project, $resource, $ticket])
+                                : route('projects.resources.tickets.attach', [$project, $resource]) }}">
+                            @csrf
+                            @if($attached)
+                                @method('DELETE')
+                            @else
+                                <input type="hidden" name="ticket_id" value="{{ $ticket->id }}" />
+                            @endif
+                            <button type="submit" class="flex items-center gap-2 w-full text-left px-2 py-1 rounded-lg transition {{ $attached ? 'bg-accent/15 text-accent hover:bg-accent/20' : 'text-gray-500 hover:text-gray-300 hover:bg-white/[0.04]' }}">
+                                <span class="text-[10px] font-mono {{ $attached ? 'opacity-80' : 'opacity-40' }}">{{ substr($resource->type, 0, 3) }}</span>
+                                <span class="text-[12px] truncate">{{ $resource->name }}</span>
+                                @if($attached)
+                                    <svg class="w-3 h-3 ml-auto flex-shrink-0 opacity-60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                @endif
+                            </button>
+                        </form>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <div class="pt-4 border-t border-white/[0.06] space-y-3">
                 <div>
                     <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-600">Reporter</span>
