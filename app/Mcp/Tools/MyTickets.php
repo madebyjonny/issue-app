@@ -14,8 +14,14 @@ class MyTickets extends Tool
 {
     public function handle(Request $request): Response
     {
+        $user = $request->user();
+
         $query = Ticket::with(['project', 'column', 'sprint'])
-            ->where('assignee_id', $request->get('user_id'));
+            ->where('assignee_id', $user->id)
+            ->whereHas('project', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            });
 
         if ($request->get('active_sprint')) {
             $query->whereHas('sprint', fn ($q) => $q->where('is_active', true));
@@ -45,7 +51,6 @@ class MyTickets extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'user_id' => $schema->integer()->description('The user ID to get assigned tickets for')->required(),
             'active_sprint' => $schema->boolean()->description('Only show tickets in the active sprint')->nullable(),
             'project_key' => $schema->string()->description('Filter by project key')->nullable(),
         ];

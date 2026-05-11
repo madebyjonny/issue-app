@@ -11,6 +11,8 @@ class ProjectResourceController extends Controller
 {
     public function store(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name'    => ['required', 'string', 'max:255'],
             'type'    => ['required', 'in:design,development,api,process'],
@@ -24,6 +26,7 @@ class ProjectResourceController extends Controller
 
     public function update(Request $request, Project $project, ProjectResource $resource)
     {
+        $this->authorize('update', $project);
         abort_if($resource->project_id !== $project->id, 403);
 
         $validated = $request->validate([
@@ -39,6 +42,7 @@ class ProjectResourceController extends Controller
 
     public function destroy(Project $project, ProjectResource $resource)
     {
+        $this->authorize('update', $project);
         abort_if($resource->project_id !== $project->id, 403);
 
         $resource->delete();
@@ -48,6 +52,7 @@ class ProjectResourceController extends Controller
 
     public function attachTicket(Request $request, Project $project, ProjectResource $resource)
     {
+        $this->authorize('update', $project);
         abort_if($resource->project_id !== $project->id, 403);
 
         $validated = $request->validate([
@@ -64,6 +69,7 @@ class ProjectResourceController extends Controller
 
     public function detachTicket(Project $project, ProjectResource $resource, Ticket $ticket)
     {
+        $this->authorize('update', $project);
         abort_if($resource->project_id !== $project->id, 403);
         abort_if($ticket->project_id !== $project->id, 403);
 

@@ -10,6 +10,8 @@ class SprintController extends Controller
 {
     public function store(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'start_date' => ['nullable', 'date'],
@@ -23,6 +25,8 @@ class SprintController extends Controller
 
     public function update(Request $request, Project $project, Sprint $sprint)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'start_date' => ['nullable', 'date'],
@@ -41,6 +45,8 @@ class SprintController extends Controller
 
     public function destroy(Project $project, Sprint $sprint)
     {
+        $this->authorize('update', $project);
+
         $sprint->tickets()->update(['sprint_id' => null]);
         $sprint->delete();
 

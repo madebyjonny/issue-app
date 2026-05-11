@@ -10,7 +10,7 @@ class ProjectMemberController extends Controller
 {
     public function store(Request $request, Project $project)
     {
-        $this->authorizeOwner($project);
+        $this->authorize('delete', $project);
 
         $existing = User::where('email', strtolower(trim($request->email)))->first();
 
@@ -45,7 +45,7 @@ class ProjectMemberController extends Controller
 
     public function destroy(Project $project, User $user)
     {
-        $this->authorizeOwner($project);
+        $this->authorize('delete', $project);
 
         if ($project->owner_id === $user->id) {
             return back()->withErrors(['email' => 'Cannot remove the project owner.']);
@@ -54,10 +54,5 @@ class ProjectMemberController extends Controller
         $project->members()->detach($user->id);
 
         return back()->with('success', 'Member removed.');
-    }
-
-    private function authorizeOwner(Project $project): void
-    {
-        abort_unless($project->owner_id === auth()->id(), 403);
     }
 }

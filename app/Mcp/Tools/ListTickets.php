@@ -14,7 +14,13 @@ class ListTickets extends Tool
 {
     public function handle(Request $request): Response
     {
-        $query = Ticket::with(['project', 'column', 'assignee', 'sprint', 'epic']);
+        $user = $request->user();
+
+        $query = Ticket::with(['project', 'column', 'assignee', 'sprint', 'epic'])
+            ->whereHas('project', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            });
 
         if ($key = $request->get('project_key')) {
             $query->whereHas('project', fn ($q) => $q->where('key', strtoupper($key)));

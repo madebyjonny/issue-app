@@ -11,6 +11,8 @@ class EpicController extends Controller
 {
     public function index(Project $project)
     {
+        $this->authorize('view', $project);
+
         $project->load(['epics.tickets', 'members', 'sprints', 'columns']);
 
         return view('epics.index', compact('project'));
@@ -18,6 +20,8 @@ class EpicController extends Controller
 
     public function show(Project $project, Epic $epic)
     {
+        $this->authorize('view', $project);
+
         $epic->load(['tickets.assignee', 'tickets.column', 'tickets.sprint']);
         $project->load(['columns', 'members', 'sprints', 'epics']);
 
@@ -26,6 +30,8 @@ class EpicController extends Controller
 
     public function store(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -39,6 +45,8 @@ class EpicController extends Controller
 
     public function update(Request $request, Project $project, Epic $epic)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -52,6 +60,8 @@ class EpicController extends Controller
 
     public function destroy(Project $project, Epic $epic)
     {
+        $this->authorize('update', $project);
+
         $epic->tickets()->update(['epic_id' => null]);
         $epic->delete();
 
@@ -60,6 +70,8 @@ class EpicController extends Controller
 
     public function createTicket(Request $request, Project $project, Epic $epic)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],

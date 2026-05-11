@@ -43,7 +43,7 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $this->authorizeProject($project);
+        $this->authorize('view', $project);
         $project->load(['columns.tickets.assignee', 'members', 'sprints', 'epics.tickets', 'resources']);
 
         return view('projects.show', compact('project'));
@@ -51,13 +51,13 @@ class ProjectController extends Controller
 
     public function edit(Project $project)
     {
-        $this->authorizeProject($project);
+        $this->authorize('update', $project);
         return view('projects.edit', compact('project'));
     }
 
     public function update(Request $request, Project $project)
     {
-        $this->authorizeProject($project);
+        $this->authorize('update', $project);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -71,17 +71,9 @@ class ProjectController extends Controller
 
     public function destroy(Project $project)
     {
-        $this->authorizeProject($project);
+        $this->authorize('delete', $project);
         $project->delete();
 
         return redirect()->route('projects.index')->with('success', 'Project deleted.');
-    }
-
-    private function authorizeProject(Project $project): void
-    {
-        abort_unless(
-            $project->owner_id === auth()->id() || $project->members->contains(auth()->id()),
-            403
-        );
     }
 }

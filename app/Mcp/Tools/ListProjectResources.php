@@ -14,10 +14,22 @@ class ListProjectResources extends Tool
 {
     public function handle(Request $request): Response
     {
+        $user = $request->user();
         $projectKey = strtoupper($request->get('project_key', ''));
-        $project = Project::where('key', $projectKey)->with('resources')->first();
+
+        $project = Project::where('key', $projectKey)
+            ->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            })
+            ->with('resources')
+            ->first();
 
         if (!$project) {
+            return Response::error("Project '{$projectKey}' not found.");
+        }
+
+        if ($user->cannot('view', $project)) {
             return Response::error("Project '{$projectKey}' not found.");
         }
 

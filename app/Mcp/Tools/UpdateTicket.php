@@ -14,11 +14,21 @@ class UpdateTicket extends Tool
 {
     public function handle(Request $request): Response
     {
+        $user = $request->user();
+
         $ticket = Ticket::with('project.columns')
             ->where('identifier', strtoupper($request->get('identifier', '')))
+            ->whereHas('project', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            })
             ->first();
 
         if (!$ticket) {
+            return Response::error("Ticket '{$request->get('identifier')}' not found.");
+        }
+
+        if ($user->cannot('update', $ticket)) {
             return Response::error("Ticket '{$request->get('identifier')}' not found.");
         }
 

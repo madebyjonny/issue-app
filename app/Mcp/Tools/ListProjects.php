@@ -14,8 +14,14 @@ class ListProjects extends Tool
 {
     public function handle(Request $request): Response
     {
+        $user = $request->user();
+
         $projects = Project::with('owner')
             ->withCount(['tickets', 'columns', 'sprints'])
+            ->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            })
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,

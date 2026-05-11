@@ -14,7 +14,13 @@ class GetSprintBoard extends Tool
 {
     public function handle(Request $request): Response
     {
+        $user = $request->user();
+
         $project = Project::where('key', strtoupper($request->get('project_key', '')))
+            ->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            })
             ->with(['columns.tickets' => function ($q) {
                 $q->whereHas('sprint', fn ($sq) => $sq->where('is_active', true))
                     ->with(['assignee'])
@@ -23,6 +29,10 @@ class GetSprintBoard extends Tool
             ->first();
 
         if (!$project) {
+            return Response::error("Project '{$request->get('project_key')}' not found.");
+        }
+
+        if ($user->cannot('view', $project)) {
             return Response::error("Project '{$request->get('project_key')}' not found.");
         }
 

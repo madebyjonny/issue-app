@@ -10,6 +10,8 @@ class ColumnController extends Controller
 {
     public function store(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -25,6 +27,8 @@ class ColumnController extends Controller
 
     public function update(Request $request, Project $project, Column $column)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
         ]);
@@ -36,6 +40,8 @@ class ColumnController extends Controller
 
     public function destroy(Project $project, Column $column)
     {
+        $this->authorize('update', $project);
+
         abort_if($column->tickets()->exists(), 422, 'Move tickets before deleting this column.');
         $column->delete();
 
@@ -44,6 +50,8 @@ class ColumnController extends Controller
 
     public function reorder(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'columns' => ['required', 'array'],
             'columns.*' => ['integer', 'exists:columns,id'],

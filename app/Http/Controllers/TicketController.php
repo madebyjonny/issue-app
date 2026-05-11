@@ -10,6 +10,8 @@ class TicketController extends Controller
 {
     public function store(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -35,6 +37,8 @@ class TicketController extends Controller
 
     public function show(Project $project, Ticket $ticket)
     {
+        $this->authorize('view', $project);
+
         $ticket->load(['assignee', 'reporter', 'column', 'sprint', 'epic', 'resources']);
         $project->load(['columns', 'members', 'sprints', 'epics', 'resources']);
 
@@ -43,6 +47,8 @@ class TicketController extends Controller
 
     public function update(Request $request, Project $project, Ticket $ticket)
     {
+        $this->authorize('update', $ticket);
+
         $validated = $request->validate([
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -66,6 +72,8 @@ class TicketController extends Controller
 
     public function destroy(Project $project, Ticket $ticket)
     {
+        $this->authorize('delete', $ticket);
+
         $epicId = $ticket->epic_id;
         $ticket->delete();
 
@@ -78,6 +86,8 @@ class TicketController extends Controller
 
     public function move(Request $request, Project $project, Ticket $ticket)
     {
+        $this->authorize('update', $ticket);
+
         $validated = $request->validate([
             'column_id' => ['required', 'exists:columns,id'],
             'position' => ['required', 'integer', 'min:0'],

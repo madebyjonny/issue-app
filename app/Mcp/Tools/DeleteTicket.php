@@ -14,10 +14,21 @@ class DeleteTicket extends Tool
 {
     public function handle(Request $request): Response
     {
+        $user = $request->user();
         $identifier = strtoupper($request->get('identifier', ''));
-        $ticket = Ticket::where('identifier', $identifier)->first();
+
+        $ticket = Ticket::where('identifier', $identifier)
+            ->whereHas('project', function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            })
+            ->first();
 
         if (!$ticket) {
+            return Response::error("Ticket '{$identifier}' not found.");
+        }
+
+        if ($user->cannot('delete', $ticket)) {
             return Response::error("Ticket '{$identifier}' not found.");
         }
 

@@ -9,6 +9,8 @@ class BoardController extends Controller
 {
     public function show(Project $project, Request $request)
     {
+        $this->authorize('view', $project);
+
         $project->load(['columns.tickets.assignee', 'columns.tickets.resources', 'members', 'sprints', 'epics', 'resources']);
 
         $sprintId = $request->query('sprint');

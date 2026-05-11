@@ -15,9 +15,20 @@ class CreateTicket extends Tool
 {
     public function handle(Request $request): Response
     {
-        $project = Project::where('key', strtoupper($request->get('project_key', '')))->first();
+        $user = $request->user();
+
+        $project = Project::where('key', strtoupper($request->get('project_key', '')))
+            ->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            })
+            ->first();
 
         if (!$project) {
+            return Response::error("Project '{$request->get('project_key')}' not found.");
+        }
+
+        if ($user->cannot('update', $project)) {
             return Response::error("Project '{$request->get('project_key')}' not found.");
         }
 
@@ -39,7 +50,7 @@ class CreateTicket extends Tool
             'description' => $request->get('description'),
             'column_id' => $column->id,
             'assignee_id' => $request->get('assignee_id'),
-            'reporter_id' => $project->owner_id,
+            'reporter_id' => $user->id,
             'sprint_id' => $request->get('sprint_id'),
             'epic_id' => $request->get('epic_id'),
             'priority' => $request->get('priority', 'none'),

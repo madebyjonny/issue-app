@@ -14,9 +14,20 @@ class CreateEpic extends Tool
 {
     public function handle(Request $request): Response
     {
-        $project = Project::where('key', strtoupper($request->get('project_key', '')))->first();
+        $user = $request->user();
+
+        $project = Project::where('key', strtoupper($request->get('project_key', '')))
+            ->where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+            })
+            ->first();
 
         if (! $project) {
+            return Response::error("Project '{$request->get('project_key')}' not found.");
+        }
+
+        if ($user->cannot('update', $project)) {
             return Response::error("Project '{$request->get('project_key')}' not found.");
         }
 
