@@ -1,203 +1,144 @@
 <x-mcp::app :title="$title">
     <x-slot:head>
         <style>
-            [x-cloak] { display: none !important; }
-            .ticket-list { min-height: 60px; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: system-ui, sans-serif; font-size: 13px; background: #f9fafb; color: #111; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+            #header { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 48px; background: #fff; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
+            #header h1 { font-size: 13px; font-weight: 600; color: #374151; }
+            #project-select { font-size: 12px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px 8px; background: #fff; color: #374151; cursor: pointer; }
+            #refresh-btn { margin-left: auto; font-size: 12px; padding: 4px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; color: #6b7280; cursor: pointer; }
+            #refresh-btn:hover { background: #f9fafb; }
+            #sprint-label { font-size: 11px; color: #9ca3af; }
+            #status { flex: 1; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 13px; }
+            #board { flex: 1; display: none; gap: 12px; padding: 16px; overflow-x: auto; overflow-y: hidden; align-items: flex-start; }
+            .col { flex-shrink: 0; width: 230px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 100%; }
+            .col-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #f3f4f6; flex-shrink: 0; }
+            .col-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #9ca3af; }
+            .col-count { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 999px; background: #f3f4f6; color: #9ca3af; }
+            .col-count.has { background: #eef2ff; color: #6366f1; }
+            .ticket-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; min-height: 60px; }
+            .ticket { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }
+            .ticket:hover { border-color: #d1d5db; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+            .ticket-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+            .ticket-id { font-family: monospace; font-size: 10px; color: #9ca3af; }
+            .pdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+            .ticket-title { font-size: 12px; font-weight: 500; color: #1f2937; line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+            .ticket-footer { display: flex; align-items: center; justify-content: space-between; }
+            .tbadge { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; }
+            .avatar { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg,#818cf8,#a78bfa); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+            .empty-col { display: flex; align-items: center; justify-content: center; height: 56px; border: 1px dashed #e5e7eb; border-radius: 8px; color: #d1d5db; font-size: 11px; }
             ::-webkit-scrollbar { width: 4px; height: 4px; }
             ::-webkit-scrollbar-track { background: transparent; }
-            ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+            ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 2px; }
         </style>
-        <script type="module">
-        // Keep a reference to the MCP app so store methods can call tools
-        let _app = null;
+        <script>
+        var PCOL = { urgent:'#ef4444', high:'#fb923c', medium:'#facc15', low:'#60a5fa', none:'#d1d5db' };
+        var TTYPE = {
+            bug:         { bg:'#fee2e2', color:'#dc2626', label:'● Bug' },
+            feature:     { bg:'#ede9fe', color:'#7c3aed', label:'◆ Feature' },
+            improvement: { bg:'#dbeafe', color:'#2563eb', label:'▲ Improvement' },
+            task:        { bg:'#f3f4f6', color:'#6b7280', label:'○ Task' }
+        };
 
-        // Define the store synchronously before Alpine boots
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('board', {
-                projects: [],
-                selectedKey: '',
-                board: null,
-                loading: true,
-                error: null,
+        function esc(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
 
-                priorityColor(p) {
-                    return { urgent: 'bg-red-500', high: 'bg-orange-400', medium: 'bg-yellow-400', low: 'bg-blue-400', none: 'bg-gray-300' }[p] ?? 'bg-gray-300';
-                },
+        function showStatus(msg) {
+            document.getElementById('status').textContent = msg;
+            document.getElementById('status').style.display = 'flex';
+            document.getElementById('board').style.display = 'none';
+        }
 
-                typeStyle(t) {
-                    return { bug: 'bg-red-100 text-red-600', feature: 'bg-purple-100 text-purple-600', improvement: 'bg-blue-100 text-blue-600', task: 'bg-gray-100 text-gray-500' }[t] ?? 'bg-gray-100 text-gray-500';
-                },
-
-                typeIcon(t) {
-                    return { bug: '●', feature: '◆', improvement: '▲', task: '○' }[t] ?? '○';
-                },
-
-                async load(key) {
-                    if (!key || !_app) return;
-                    this.loading = true;
-                    this.error = null;
-                    this.board = null;
-                    try {
-                        const result = await _app.callServerTool('get-sprint-board', { project_key: key });
-                        if (result.isError) {
-                            this.error = result.content[0]?.text ?? 'Failed to load board.';
-                        } else {
-                            this.board = JSON.parse(result.content[0]?.text ?? 'null');
-                        }
-                    } catch (e) {
-                        this.error = 'Failed to load board.';
-                    }
-                    this.loading = false;
-                },
-            });
-        });
-
-        createMcpApp(async (app) => {
-            _app = app;
-            const store = Alpine.store('board');
-
-            try {
-                const result = await app.callServerTool('list-projects', {});
-                if (!result.isError) {
-                    store.projects = JSON.parse(result.content[0]?.text ?? '[]');
-                    store.selectedKey = store.projects[0]?.key ?? '';
+        function renderBoard(data) {
+            document.getElementById('sprint-label').textContent = data.sprint || '';
+            var board = document.getElementById('board');
+            board.innerHTML = '';
+            data.columns.forEach(function(col) {
+                var n = col.tickets.length;
+                var colEl = document.createElement('div');
+                colEl.className = 'col';
+                var listId = 'tl-' + Math.random().toString(36).slice(2);
+                colEl.innerHTML =
+                    '<div class="col-header">' +
+                        '<span class="col-name">' + esc(col.name) + '</span>' +
+                        '<span class="col-count' + (n > 0 ? ' has' : '') + '">' + n + '</span>' +
+                    '</div>' +
+                    '<div class="ticket-list" id="' + listId + '"></div>';
+                board.appendChild(colEl);
+                var list = document.getElementById(listId);
+                if (n === 0) {
+                    list.innerHTML = '<div class="empty-col">Empty</div>';
+                } else {
+                    col.tickets.forEach(function(t) {
+                        var ts = TTYPE[t.type] || TTYPE.task;
+                        var el = document.createElement('div');
+                        el.className = 'ticket';
+                        el.innerHTML =
+                            '<div class="ticket-meta">' +
+                                '<span class="ticket-id">' + esc(t.identifier) + '</span>' +
+                                '<span class="pdot" style="background:' + (PCOL[t.priority] || PCOL.none) + '"></span>' +
+                            '</div>' +
+                            '<div class="ticket-title">' + esc(t.title) + '</div>' +
+                            '<div class="ticket-footer">' +
+                                '<span class="tbadge" style="background:' + ts.bg + ';color:' + ts.color + '">' + ts.label + '</span>' +
+                                (t.assignee ? '<div class="avatar" title="' + esc(t.assignee) + '">' + esc(t.assignee[0].toUpperCase()) + '</div>' : '') +
+                            '</div>';
+                        list.appendChild(el);
+                    });
                 }
-            } catch (e) {}
+            });
+            document.getElementById('status').style.display = 'none';
+            board.style.display = 'flex';
+        }
 
-            if (store.selectedKey) {
-                await store.load(store.selectedKey);
-            } else {
-                store.loading = false;
-            }
+        var _app = null;
+
+        async function loadBoard(key) {
+            if (!key || !_app) return;
+            showStatus('Loading…');
+            try {
+                var r = await _app.callServerTool('get-sprint-board', { project_key: key });
+                if (r.isError) { showStatus(r.content[0] ? r.content[0].text : 'Error.'); return; }
+                renderBoard(JSON.parse(r.content[0].text));
+            } catch(e) { showStatus('Error loading board.'); }
+        }
+
+        createMcpApp(async function(app) {
+            _app = app;
+            showStatus('Loading…');
+            var projects = [];
+            try {
+                var r = await app.callServerTool('list-projects', {});
+                if (!r.isError && r.content[0]) projects = JSON.parse(r.content[0].text);
+            } catch(e) {}
+
+            if (projects.length === 0) { showStatus('No projects found.'); return; }
+
+            var sel = document.getElementById('project-select');
+            projects.forEach(function(p) {
+                var o = document.createElement('option');
+                o.value = p.key;
+                o.textContent = p.name + ' · ' + p.key;
+                sel.appendChild(o);
+            });
+
+            await loadBoard(projects[0].key);
         });
         </script>
     </x-slot:head>
 
-    <div x-data class="h-screen flex flex-col bg-gray-50 text-gray-900 font-sans text-sm overflow-hidden select-none">
-
-        {{-- Header --}}
-        <div class="flex items-center gap-3 px-4 h-12 border-b border-gray-200 bg-white flex-shrink-0">
-            <svg class="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
-            </svg>
-            <span class="text-[13px] font-semibold text-gray-700">Board</span>
-
-            <div class="h-4 w-px bg-gray-200 mx-1"></div>
-
-            <select
-                x-model="$store.board.selectedKey"
-                @change="$store.board.load($store.board.selectedKey)"
-                class="text-[12px] border border-gray-200 rounded-md px-2 py-1 bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-400 max-w-[180px]">
-                <template x-for="p in $store.board.projects" :key="p.key">
-                    <option :value="p.key" x-text="p.name + ' · ' + p.key"></option>
-                </template>
-            </select>
-
-            <span
-                x-show="$store.board.board"
-                x-cloak
-                class="text-[11px] text-gray-400 truncate"
-                x-text="'Sprint: ' + ($store.board.board?.sprint ?? '—')">
-            </span>
-
-            <button
-                @click="$store.board.load($store.board.selectedKey)"
-                :disabled="$store.board.loading"
-                class="ml-auto flex items-center gap-1.5 text-[12px] px-2.5 py-1 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 transition">
-                <svg class="w-3 h-3" :class="{ 'animate-spin': $store.board.loading }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
-                </svg>
-                Refresh
-            </button>
-        </div>
-
-        {{-- Loading --}}
-        <div x-show="$store.board.loading" x-cloak class="flex-1 flex items-center justify-center">
-            <div class="flex items-center gap-2.5 text-[13px] text-gray-400">
-                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                Loading board…
-            </div>
-        </div>
-
-        {{-- Error --}}
-        <div x-show="!$store.board.loading && $store.board.error" x-cloak class="flex-1 flex items-center justify-center">
-            <p class="text-[13px] text-red-400" x-text="$store.board.error"></p>
-        </div>
-
-        {{-- Empty: no projects --}}
-        <div x-show="!$store.board.loading && $store.board.projects.length === 0" x-cloak class="flex-1 flex items-center justify-center">
-            <p class="text-[13px] text-gray-400">No projects found.</p>
-        </div>
-
-        {{-- Board columns --}}
-        <div
-            x-show="!$store.board.loading && $store.board.board"
-            x-cloak
-            class="flex-1 flex gap-3 p-4 overflow-x-auto overflow-y-hidden items-start">
-
-            <template x-for="col in ($store.board.board?.columns ?? [])" :key="col.name">
-                <div class="flex-shrink-0 w-[240px] flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden max-h-full">
-
-                    {{-- Column header --}}
-                    <div class="flex items-center justify-between px-3 py-2 border-b border-gray-100 flex-shrink-0">
-                        <span class="text-[11px] font-semibold uppercase tracking-wider text-gray-400" x-text="col.name"></span>
-                        <span
-                            class="text-[10px] font-semibold tabular-nums px-1.5 py-0.5 rounded-full"
-                            :class="col.tickets.length > 0 ? 'bg-indigo-50 text-indigo-500' : 'bg-gray-100 text-gray-400'"
-                            x-text="col.tickets.length">
-                        </span>
-                    </div>
-
-                    {{-- Ticket list --}}
-                    <div class="ticket-list flex-1 overflow-y-auto p-2 space-y-1.5">
-
-                        <template x-for="ticket in col.tickets" :key="ticket.identifier">
-                            <div class="bg-white rounded-lg border border-gray-200 p-3 hover:border-gray-300 hover:shadow-sm transition-all duration-100">
-
-                                {{-- Identifier + priority --}}
-                                <div class="flex items-center gap-1.5 mb-1.5">
-                                    <span class="text-[10px] font-mono text-gray-400" x-text="ticket.identifier"></span>
-                                    <span
-                                        class="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                                        :class="$store.board.priorityColor(ticket.priority)">
-                                    </span>
-                                </div>
-
-                                {{-- Title --}}
-                                <p class="text-[12px] text-gray-800 font-medium leading-snug mb-2.5 line-clamp-2"
-                                   x-text="ticket.title"></p>
-
-                                {{-- Type + assignee --}}
-                                <div class="flex items-center justify-between gap-2">
-                                    <span
-                                        class="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                                        :class="$store.board.typeStyle(ticket.type)"
-                                        x-text="$store.board.typeIcon(ticket.type) + ' ' + (ticket.type ? ticket.type.charAt(0).toUpperCase() + ticket.type.slice(1) : 'Task')">
-                                    </span>
-
-                                    <div
-                                        x-show="ticket.assignee"
-                                        class="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
-                                        :title="ticket.assignee"
-                                        x-text="ticket.assignee ? ticket.assignee.charAt(0).toUpperCase() : ''">
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-
-                        {{-- Empty column --}}
-                        <div x-show="col.tickets.length === 0"
-                             class="flex items-center justify-center h-16 rounded-lg border border-dashed border-gray-200">
-                            <span class="text-[11px] text-gray-300">Empty</span>
-                        </div>
-
-                    </div>
-                </div>
-            </template>
-        </div>
-
+    <div id="header">
+        <svg width="16" height="16" fill="none" stroke="#6366f1" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"/>
+        </svg>
+        <h1>Board</h1>
+        <div style="width:1px;height:16px;background:#e5e7eb"></div>
+        <select id="project-select" onchange="loadBoard(this.value)"></select>
+        <span id="sprint-label"></span>
+        <button id="refresh-btn" onclick="loadBoard(document.getElementById('project-select').value)">↻ Refresh</button>
     </div>
+    <div id="status">Loading…</div>
+    <div id="board"></div>
+
 </x-mcp::app>

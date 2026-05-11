@@ -10,7 +10,7 @@ use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Ui\Enums\Library;
 
 #[Description('Interactive visual Kanban board showing project tickets grouped by column.')]
-#[AppMeta(libraries: [Library::Tailwind, Library::Alpine])]
+#[AppMeta(libraries: [])]
 class TicketBoardApp extends AppResource
 {
     public function handle(Request $request): Response
