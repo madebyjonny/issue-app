@@ -75,12 +75,12 @@
                 {{-- Tickets drop zone --}}
                 <div class="flex-1 space-y-2 min-h-[100px] overflow-y-auto pb-4 ticket-list" data-column-id="{{ $column->id }}">
                     @foreach($column->tickets as $ticket)
-                        <div class="ticket-card group bg-white hover:bg-gray-50/80 border border-gray-200 hover:border-gray-300 rounded-lg p-3.5 cursor-grab active:cursor-grabbing transition-all duration-150 shadow-sm"
+                        <div class="ticket-card group bg-white hover:bg-gray-50/80 border border-gray-200 hover:border-gray-300 rounded-lg p-3.5 cursor-grab active:cursor-grabbing transition-all duration-150 shadow-sm dark:bg-[#1f1f23] dark:border-white/[0.08] dark:hover:bg-white/[0.06] dark:hover:border-white/[0.15] dark:shadow-none"
                              draggable="true"
                              data-ticket-id="{{ $ticket->id }}"
                              onclick="openTicketDialog({{ $ticket->id }})">
                             <div class="flex items-center gap-2 mb-2">
-                                <span class="text-[11px] text-gray-500 font-mono">{{ $ticket->identifier }}</span>
+                                <span class="text-[11px] text-gray-500 dark:text-gray-500 font-mono">{{ $ticket->identifier }}</span>
                                 @php
                                     $priorityColors = [
                                         'urgent' => 'bg-red-500',
@@ -92,7 +92,7 @@
                                 @endphp
                                 <span class="w-2 h-2 rounded-full {{ $priorityColors[$ticket->priority] ?? 'bg-gray-500' }} flex-shrink-0"></span>
                             </div>
-                            <p class="text-[13px] text-gray-800 leading-snug group-hover:text-gray-900 transition font-medium">{{ $ticket->title }}</p>
+                            <p class="text-[13px] text-gray-800 leading-snug group-hover:text-gray-900 transition font-medium dark:text-gray-200 dark:group-hover:text-white">{{ $ticket->title }}</p>
                             <div class="flex items-center justify-between mt-3">
                                 <div class="flex items-center gap-1.5">
                                     @php
