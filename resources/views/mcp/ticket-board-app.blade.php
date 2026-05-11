@@ -8,81 +8,66 @@
             ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
         </style>
         <script type="module">
-        createMcpApp(async (app) => {
+        // Keep a reference to the MCP app so store methods can call tools
+        let _app = null;
 
-            async function fetchProjects() {
-                try {
-                    const result = await app.callServerTool('list-projects', {});
-                    if (result.isError) return [];
-                    return JSON.parse(result.content[0]?.text ?? '[]');
-                } catch (e) {
-                    return [];
-                }
-            }
-
-            async function fetchBoard(projectKey) {
-                try {
-                    const result = await app.callServerTool('get-sprint-board', { project_key: projectKey });
-                    if (result.isError) return null;
-                    return JSON.parse(result.content[0]?.text ?? 'null');
-                } catch (e) {
-                    return null;
-                }
-            }
-
-            const projects = await fetchProjects();
-
+        // Define the store synchronously before Alpine boots
+        document.addEventListener('alpine:init', () => {
             Alpine.store('board', {
-                projects,
-                selectedKey: projects[0]?.key ?? '',
+                projects: [],
+                selectedKey: '',
                 board: null,
-                loading: false,
+                loading: true,
                 error: null,
 
-                get selectedProject() {
-                    return this.projects.find(p => p.key === this.selectedKey) ?? null;
-                },
-
-                async load(key) {
-                    if (!key) return;
-                    this.loading = true;
-                    this.error = null;
-                    this.board = null;
-                    const data = await fetchBoard(key);
-                    if (!data) {
-                        this.error = 'Could not load board data.';
-                    } else {
-                        this.board = data;
-                    }
-                    this.loading = false;
-                },
-
                 priorityColor(p) {
-                    return {
-                        urgent: 'bg-red-500',
-                        high:   'bg-orange-400',
-                        medium: 'bg-yellow-400',
-                        low:    'bg-blue-400',
-                        none:   'bg-gray-300',
-                    }[p] ?? 'bg-gray-300';
+                    return { urgent: 'bg-red-500', high: 'bg-orange-400', medium: 'bg-yellow-400', low: 'bg-blue-400', none: 'bg-gray-300' }[p] ?? 'bg-gray-300';
                 },
 
                 typeStyle(t) {
-                    return {
-                        bug:         'bg-red-100 text-red-600',
-                        feature:     'bg-purple-100 text-purple-600',
-                        improvement: 'bg-blue-100 text-blue-600',
-                        task:        'bg-gray-100 text-gray-500',
-                    }[t] ?? 'bg-gray-100 text-gray-500';
+                    return { bug: 'bg-red-100 text-red-600', feature: 'bg-purple-100 text-purple-600', improvement: 'bg-blue-100 text-blue-600', task: 'bg-gray-100 text-gray-500' }[t] ?? 'bg-gray-100 text-gray-500';
                 },
 
                 typeIcon(t) {
                     return { bug: '●', feature: '◆', improvement: '▲', task: '○' }[t] ?? '○';
                 },
-            });
 
-            if (projects[0]?.key) {
-                Alpine.store('board').load(projects[0].key);
+                async load(key) {
+                    if (!key || !_app) return;
+                    this.loading = true;
+                    this.error = null;
+                    this.board = null;
+                    try {
+                        const result = await _app.callServerTool('get-sprint-board', { project_key: key });
+                        if (result.isError) {
+                            this.error = result.content[0]?.text ?? 'Failed to load board.';
+                        } else {
+                            this.board = JSON.parse(result.content[0]?.text ?? 'null');
+                        }
+                    } catch (e) {
+                        this.error = 'Failed to load board.';
+                    }
+                    this.loading = false;
+                },
+            });
+        });
+
+        createMcpApp(async (app) => {
+            _app = app;
+            const store = Alpine.store('board');
+
+            try {
+                const result = await app.callServerTool('list-projects', {});
+                if (!result.isError) {
+                    store.projects = JSON.parse(result.content[0]?.text ?? '[]');
+                    store.selectedKey = store.projects[0]?.key ?? '';
+                }
+            } catch (e) {}
+
+            if (store.selectedKey) {
+                await store.load(store.selectedKey);
+            } else {
+                store.loading = false;
             }
         });
         </script>
