@@ -12,9 +12,9 @@
 
             async function fetchProjects() {
                 try {
-                    const res = await app.callServerTool('list-projects', {});
-                    const text = res.content?.[0]?.text ?? '[]';
-                    return JSON.parse(text);
+                    const result = await app.callServerTool('list-projects', {});
+                    if (result.isError) return [];
+                    return JSON.parse(result.content[0]?.text ?? '[]');
                 } catch (e) {
                     return [];
                 }
@@ -22,9 +22,9 @@
 
             async function fetchBoard(projectKey) {
                 try {
-                    const res = await app.callServerTool('get-sprint-board', { project_key: projectKey });
-                    const text = res.content?.[0]?.text ?? 'null';
-                    return JSON.parse(text);
+                    const result = await app.callServerTool('get-sprint-board', { project_key: projectKey });
+                    if (result.isError) return null;
+                    return JSON.parse(result.content[0]?.text ?? 'null');
                 } catch (e) {
                     return null;
                 }
@@ -81,7 +81,6 @@
                 },
             });
 
-            // Auto-load the first project
             if (projects[0]?.key) {
                 Alpine.store('board').load(projects[0].key);
             }
