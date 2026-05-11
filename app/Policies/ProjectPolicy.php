@@ -13,7 +13,7 @@ class ProjectPolicy
     private function isMember(User $user, Project $project): bool
     {
         return $project->owner_id === $user->id
-            || $project->members()->where('id', $user->id)->exists();
+            || $project->members()->where('users.id', $user->id)->exists();
     }
 
     public function view(User $user, Project $project): bool

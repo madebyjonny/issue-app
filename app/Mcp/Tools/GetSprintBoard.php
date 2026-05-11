@@ -19,7 +19,7 @@ class GetSprintBoard extends Tool
         $project = Project::where('key', strtoupper($request->get('project_key', '')))
             ->where(function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
-                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+                  ->orWhereHas('members', fn ($mq) => $mq->where('users.id', $user->id));
             })
             ->with(['columns.tickets' => function ($q) {
                 $q->whereHas('sprint', fn ($sq) => $sq->where('is_active', true))

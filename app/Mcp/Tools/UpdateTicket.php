@@ -20,7 +20,7 @@ class UpdateTicket extends Tool
             ->where('identifier', strtoupper($request->get('identifier', '')))
             ->whereHas('project', function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
-                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+                  ->orWhereHas('members', fn ($mq) => $mq->where('users.id', $user->id));
             })
             ->first();
 

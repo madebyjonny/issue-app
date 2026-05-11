@@ -20,7 +20,7 @@ class ListProjects extends Tool
             ->withCount(['tickets', 'columns', 'sprints'])
             ->where(function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
-                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+                  ->orWhereHas('members', fn ($mq) => $mq->where('users.id', $user->id));
             })
             ->get()
             ->map(fn ($p) => [

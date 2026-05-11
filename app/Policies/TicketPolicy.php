@@ -15,7 +15,7 @@ class TicketPolicy
         $project = $ticket->project;
 
         return $project->owner_id === $user->id
-            || $project->members()->where('id', $user->id)->exists();
+            || $project->members()->where('users.id', $user->id)->exists();
     }
 
     public function view(User $user, Ticket $ticket): bool

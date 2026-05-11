@@ -20,7 +20,7 @@ class MyTickets extends Tool
             ->where('assignee_id', $user->id)
             ->whereHas('project', function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
-                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+                  ->orWhereHas('members', fn ($mq) => $mq->where('users.id', $user->id));
             });
 
         if ($request->get('active_sprint')) {

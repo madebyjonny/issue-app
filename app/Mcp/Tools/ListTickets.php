@@ -19,7 +19,7 @@ class ListTickets extends Tool
         $query = Ticket::with(['project', 'column', 'assignee', 'sprint', 'epic'])
             ->whereHas('project', function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
-                  ->orWhereHas('members', fn ($mq) => $mq->where('id', $user->id));
+                  ->orWhereHas('members', fn ($mq) => $mq->where('users.id', $user->id));
             });
 
         if ($key = $request->get('project_key')) {
