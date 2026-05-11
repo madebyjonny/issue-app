@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Resources\TicketBoardApp;
 use App\Mcp\Tools\CreateEpic;
 use App\Mcp\Tools\CreateProjectResource;
 use App\Mcp\Tools\CreateTicket;
@@ -14,6 +15,7 @@ use App\Mcp\Tools\ListProjects;
 use App\Mcp\Tools\ListTickets;
 use App\Mcp\Tools\Me;
 use App\Mcp\Tools\MyTickets;
+use App\Mcp\Tools\ShowTicketBoard;
 use App\Mcp\Tools\UpdateTicket;
 use App\Mcp\Tools\UpdateTicketResources;
 use Laravel\Mcp\Server;
@@ -41,10 +43,11 @@ class Issues extends Server
         ListProjectResources::class,
         CreateProjectResource::class,
         UpdateTicketResources::class,
+        ShowTicketBoard::class,
     ];
 
     protected array $resources = [
-        //
+        TicketBoardApp::class,
     ];
 
     protected array $prompts = [
