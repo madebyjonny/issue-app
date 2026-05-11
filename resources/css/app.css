@@ -11,10 +11,16 @@
         background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(0, 0, 0, 0.12);
         border-radius: 3px;
     }
     ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    html.dark ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    html.dark ::-webkit-scrollbar-thumb:hover {
         background: rgba(255, 255, 255, 0.14);
     }
     ::selection {
@@ -24,24 +30,107 @@
 
 @layer components {
     .card {
-        @apply bg-surface-300/60 border border-white/[0.06] rounded-xl;
+        @apply bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-[#1f1f23] dark:border-white/[0.08] dark:shadow-none;
     }
     .card-padded {
         @apply card p-5;
     }
     .section-title {
-        @apply text-[13px] font-semibold text-white;
+        @apply text-[13px] font-semibold text-gray-900 dark:text-white;
     }
     .section-desc {
         @apply text-[13px] text-gray-500 mt-0.5;
     }
     .input-dark {
-        @apply bg-surface-400/50 border border-white/[0.06] text-gray-200 placeholder-gray-600 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 rounded-lg text-sm transition;
+        @apply bg-white border border-gray-200 text-gray-800 placeholder-gray-400 focus:border-accent/50 focus:ring-1 focus:ring-accent/30 rounded-lg text-sm transition dark:bg-[#1a1a1e] dark:border-white/[0.08] dark:text-gray-200 dark:placeholder-gray-600;
     }
     .btn-ghost {
-        @apply px-3 py-1.5 text-[13px] text-gray-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition;
+        @apply px-3 py-1.5 text-[13px] text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/[0.06];
     }
     .btn-danger-ghost {
-        @apply px-3 py-1.5 text-[13px] text-red-400/80 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition;
+        @apply px-3 py-1.5 text-[13px] text-red-500/80 hover:text-red-600 hover:bg-red-50 rounded-lg transition dark:text-red-400/80 dark:hover:text-red-400 dark:hover:bg-red-500/10;
     }
+}
+
+/* ==============================================
+   Dark mode overrides for hardcoded Tailwind
+   utility classes used in blade templates
+   ============================================== */
+html.dark {
+    color-scheme: dark;
+}
+html.dark .bg-gray-50 {
+    background-color: #151518;
+}
+html.dark .bg-white {
+    background-color: #1a1a1e;
+}
+html.dark .bg-gray-100 {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+html.dark .border-gray-200 {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+html.dark .border-gray-100 {
+    border-color: rgba(255, 255, 255, 0.04);
+}
+html.dark .ring-gray-200 {
+    --tw-ring-color: rgba(255, 255, 255, 0.08);
+}
+html.dark .ring-gray-100 {
+    --tw-ring-color: rgba(255, 255, 255, 0.04);
+}
+html.dark .text-gray-900 {
+    color: #f3f4f6;
+}
+html.dark .text-gray-800 {
+    color: #e5e7eb;
+}
+html.dark .text-gray-700 {
+    color: #d1d5db;
+}
+html.dark .shadow-sm {
+    box-shadow: none;
+}
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+html.dark .hover\:bg-gray-50:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+html.dark .hover\:bg-gray-100:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+html.dark .hover\:bg-gray-50\/80:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+html.dark .hover\:border-gray-300:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+html.dark .bg-white\/90 {
+    background-color: rgba(17, 17, 20, 0.85) !important;
+}
+html.dark .shadow-gray-900\/10 {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+html.dark .bg-emerald-50 {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+html.dark .border-emerald-200 {
+    border-color: rgba(16, 185, 129, 0.2);
+}
+html.dark .text-emerald-700 {
+    color: rgb(52, 211, 153);
+}
+html.dark .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+html.dark .border-red-200 {
+    border-color: rgba(239, 68, 68, 0.2);
+}
+html.dark .text-red-700 {
+    color: rgb(252, 165, 165);
 }

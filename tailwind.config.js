@@ -18,15 +18,15 @@ export default {
             colors: {
                 // Linear-inspired palette with better contrast
                 surface: {
-                    DEFAULT: "#0d0d0f",
-                    50: "#3a3a3f", // Lightest - hover states
-                    100: "#2e2e33", // Active elements
-                    200: "#252529", // Elevated surfaces
-                    300: "#1f1f23", // Card backgrounds
-                    400: "#1a1a1e", // Slightly elevated
-                    500: "#151518", // Main content area
-                    600: "#111114", // Sidebar background
-                    700: "#0d0d0f", // Base background
+                    DEFAULT: "#ffffff",
+                    50: "#e5e7eb", // border / divider
+                    100: "#f3f4f6", // light hover
+                    200: "#f9fafb", // near-white
+                    300: "#ffffff", // card background
+                    400: "#f3f4f6", // off-white / aside
+                    500: "#f9fafb", // main content area
+                    600: "#111114", // sidebar background (dark)
+                    700: "#0d0d0f",
                     800: "#0a0a0c",
                     900: "#050506",
                 },

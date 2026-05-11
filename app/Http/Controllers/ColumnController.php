@@ -42,7 +42,10 @@ class ColumnController extends Controller
     {
         $this->authorize('update', $project);
 
-        abort_if($column->tickets()->exists(), 422, 'Move tickets before deleting this column.');
+        if ($column->tickets()->exists()) {
+            return back()->with('error', 'Move all tickets out of "' . $column->name . '" before deleting it.');
+        }
+
         $column->delete();
 
         return back()->with('success', 'Column deleted.');

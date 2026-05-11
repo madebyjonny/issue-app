@@ -2,7 +2,7 @@
 
     <x-slot name="header">
         <div class="flex items-center gap-2.5">
-            <a href="{{ route('projects.board', $project) }}" class="text-gray-600 hover:text-gray-300 transition">
+            <a href="{{ route('projects.board', $project) }}" class="text-gray-400 hover:text-gray-700 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
             </a>
             <span class="text-[12px] font-mono text-gray-500">{{ $ticket->identifier }}</span>
@@ -18,12 +18,12 @@
 
                 <div>
                     <input type="text" name="title" value="{{ $ticket->title }}" placeholder="Issue title"
-                           class="w-full bg-transparent border-0 text-[18px] font-semibold text-white focus:ring-0 p-0 focus:outline-none placeholder-gray-500" />
+                           class="w-full bg-transparent border-0 text-[18px] font-semibold text-gray-900 focus:ring-0 p-0 focus:outline-none placeholder-gray-300" />
                 </div>
 
                 <div>
                     <textarea name="description" rows="20" placeholder="Add description..."
-                              class="w-full bg-transparent border-0 text-[14px] text-gray-300 placeholder-gray-500 focus:ring-0 p-0 resize-none focus:outline-none leading-relaxed">{{ $ticket->description }}</textarea>
+                              class="w-full bg-transparent border-0 text-[14px] text-gray-700 placeholder-gray-300 focus:ring-0 p-0 resize-none focus:outline-none leading-relaxed">{{ $ticket->description }}</textarea>
                 </div>
 
                 <x-primary-button>Save Changes</x-primary-button>
@@ -31,7 +31,7 @@
         </div>
 
         {{-- Meta sidebar --}}
-        <div class="w-56 border-l border-white/[0.06] p-5 space-y-4 overflow-y-auto bg-surface-300/30">
+        <div class="w-56 border-l border-gray-200 p-5 space-y-4 overflow-y-auto bg-gray-50">
             <form method="POST" action="{{ route('tickets.update', [$project, $ticket]) }}" id="meta-form">
                 @csrf
                 @method('PUT')

@@ -2,10 +2,10 @@
 
     <x-slot name="header">
         <div class="flex items-center gap-2">
-            <a href="{{ route('projects.show', $project) }}" class="text-gray-600 hover:text-gray-300 transition">
+            <a href="{{ route('projects.show', $project) }}" class="text-gray-400 hover:text-gray-700 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
             </a>
-            <h2 class="text-[15px] font-semibold text-white">Edit Project</h2>
+            <h2 class="text-[15px] font-semibold text-gray-900">Edit Project</h2>
         </div>
     </x-slot>
 

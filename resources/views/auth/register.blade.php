@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <h2 class="text-lg font-semibold text-white mb-6">Create your account</h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-6">Create your account</h2>
 
     <form method="POST" action="{{ route('register') }}">
         @csrf
@@ -35,7 +35,7 @@
         </div>
 
         <div class="mt-4 text-center">
-            <a class="text-sm text-gray-400 hover:text-white transition" href="{{ route('login') }}">
+            <a class="text-sm text-gray-500 hover:text-gray-800 transition" href="{{ route('login') }}">
                 {{ __('Already have an account? Sign in') }}
             </a>
         </div>

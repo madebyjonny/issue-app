@@ -2,7 +2,7 @@
 
     <x-slot name="header">
         <div class="flex items-center gap-3">
-            <h2 class="text-[15px] font-semibold text-white">Settings</h2>
+            <h2 class="text-[15px] font-semibold text-gray-900">Settings</h2>
         </div>
         <a href="{{ route('projects.edit', $project) }}" class="btn-ghost flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
@@ -21,22 +21,22 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[12px] text-gray-500 mb-1">Name</label>
-                        <p class="text-[13px] text-white">{{ $project->name }}</p>
+                        <p class="text-[13px] text-gray-900">{{ $project->name }}</p>
                     </div>
                     <div>
                         <label class="block text-[12px] text-gray-500 mb-1">Key</label>
-                        <p class="text-[13px] text-white font-mono">{{ $project->key }}</p>
+                        <p class="text-[13px] text-gray-900 font-mono">{{ $project->key }}</p>
                     </div>
                 </div>
                 @if($project->description)
                 <div>
                     <label class="block text-[12px] text-gray-500 mb-1">Description</label>
-                    <p class="text-[13px] text-gray-300">{{ $project->description }}</p>
+                    <p class="text-[13px] text-gray-700">{{ $project->description }}</p>
                 </div>
                 @endif
                 <div>
                     <label class="block text-[12px] text-gray-500 mb-1">Owner</label>
-                    <p class="text-[13px] text-gray-300">{{ $project->owner->name }}</p>
+                    <p class="text-[13px] text-gray-700">{{ $project->owner->name }}</p>
                 </div>
             </div>
         </div>
@@ -48,15 +48,15 @@
                 <p class="section-desc">Board workflow stages.</p>
             </div>
             <div class="flex-1 card overflow-hidden">
-                <div class="divide-y divide-white/[0.04]">
+                <div class="divide-y divide-gray-100">
                     @foreach($project->columns as $column)
                         <div class="flex items-center gap-3 px-5 py-3 group">
                             <form method="POST" action="{{ route('columns.update', [$project, $column]) }}" class="flex items-center gap-3 flex-1">
                                 @csrf
                                 @method('PUT')
-                                <div class="w-2 h-2 rounded-full bg-gray-600 flex-shrink-0"></div>
-                                <input type="text" name="name" value="{{ $column->name }}" class="flex-1 bg-transparent border-0 text-[13px] text-gray-300 p-0 focus:ring-0 focus:text-white" />
-                                <button type="submit" class="text-[12px] text-gray-600 hover:text-white transition opacity-0 group-hover:opacity-100">Save</button>
+                                <div class="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0"></div>
+                                <input type="text" name="name" value="{{ $column->name }}" class="flex-1 bg-transparent border-0 text-[13px] text-gray-700 p-0 focus:ring-0 focus:text-gray-900" />
+                                <button type="submit" class="text-[12px] text-gray-400 hover:text-gray-700 transition opacity-0 group-hover:opacity-100">Save</button>
                             </form>
                             <form method="POST" action="{{ route('columns.destroy', [$project, $column]) }}" class="opacity-0 group-hover:opacity-100 transition">
                                 @csrf
@@ -66,10 +66,10 @@
                         </div>
                     @endforeach
                 </div>
-                <form method="POST" action="{{ route('columns.store', $project) }}" class="flex items-center gap-3 px-5 py-3 border-t border-white/[0.04]">
+                <form method="POST" action="{{ route('columns.store', $project) }}" class="flex items-center gap-3 px-5 py-3 border-t border-gray-100">
                     @csrf
-                    <div class="w-2 h-2 rounded-full bg-gray-700/50 flex-shrink-0"></div>
-                    <input type="text" name="name" placeholder="Add column..." required class="flex-1 bg-transparent border-0 text-[13px] text-gray-300 placeholder-gray-600 p-0 focus:ring-0" />
+                    <div class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></div>
+                    <input type="text" name="name" placeholder="Add column..." required class="flex-1 bg-transparent border-0 text-[13px] text-gray-700 placeholder-gray-400 p-0 focus:ring-0" />
                     <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition">Add</button>
                 </form>
             </div>
@@ -86,7 +86,7 @@
                     <div class="card flex items-center gap-3 px-5 py-3 group">
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <span class="text-[13px] text-white">{{ $sprint->name }}</span>
+                                <span class="text-[13px] text-gray-900">{{ $sprint->name }}</span>
                                 @if($sprint->is_active)
                                     <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 rounded border border-emerald-500/20">Active</span>
                                 @endif
@@ -114,7 +114,7 @@
                 @endforeach
                 <form method="POST" action="{{ route('sprints.store', $project) }}" class="card flex items-center gap-3 px-5 py-3">
                     @csrf
-                    <input type="text" name="name" placeholder="Sprint name..." required class="flex-1 bg-transparent border-0 text-[13px] text-gray-300 placeholder-gray-600 p-0 focus:ring-0" />
+                    <input type="text" name="name" placeholder="Sprint name..." required class="flex-1 bg-transparent border-0 text-[13px] text-gray-700 placeholder-gray-400 p-0 focus:ring-0" />
                     <input type="date" name="start_date" class="input-dark text-[12px] px-2 py-1" />
                     <input type="date" name="end_date" class="input-dark text-[12px] px-2 py-1" />
                     <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition whitespace-nowrap">Add Sprint</button>
@@ -129,14 +129,14 @@
                 <p class="section-desc">People on this project.</p>
             </div>
             <div class="flex-1 card overflow-hidden">
-                <div class="divide-y divide-white/[0.04]">
+                <div class="divide-y divide-gray-100">
                     @foreach($project->members as $member)
                         <div class="flex items-center gap-3 px-5 py-3 group">
                             <div class="w-7 h-7 rounded-full bg-gradient-to-br from-accent/30 to-accent/10 flex items-center justify-center text-[11px] font-semibold text-accent ring-1 ring-white/[0.06]">
                                 {{ strtoupper(substr($member->name, 0, 1)) }}
                             </div>
                             <div class="flex-1 min-w-0">
-                                <span class="text-[13px] text-gray-300">{{ $member->name }}</span>
+                                <span class="text-[13px] text-gray-700">{{ $member->name }}</span>
                                 <span class="text-[12px] text-gray-600 ml-2">{{ $member->email }}</span>
                             </div>
                             <span class="text-[12px] text-gray-600 capitalize">{{ $member->pivot->role }}</span>
@@ -152,20 +152,20 @@
                 </div>
 
                 @if($project->owner_id === auth()->id())
-                    <form method="POST" action="{{ route('projects.members.store', $project) }}" class="border-t border-white/[0.04] px-5 py-4 space-y-3" x-data="{ expanded: {{ $errors->has('email') || $errors->has('name') || $errors->has('password') ? 'true' : 'false' }} }">
+                    <form method="POST" action="{{ route('projects.members.store', $project) }}" class="border-t border-gray-100 px-5 py-4 space-y-3" x-data="{ expanded: {{ $errors->has('email') || $errors->has('name') || $errors->has('password') ? 'true' : 'false' }} }">
                         @csrf
                         <div class="flex items-center gap-3">
                             <svg class="w-4 h-4 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            <input type="email" name="email" placeholder="Add by email address..." value="{{ old('email') }}" required class="flex-1 bg-transparent border-0 text-[13px] text-gray-300 placeholder-gray-600 p-0 focus:ring-0" @focus="expanded = true" />
+                            <input type="email" name="email" placeholder="Add by email address..." value="{{ old('email') }}" required class="flex-1 bg-transparent border-0 text-[13px] text-gray-700 placeholder-gray-400 p-0 focus:ring-0" @focus="expanded = true" />
                             <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition whitespace-nowrap">Add Member</button>
                         </div>
                         <div x-show="expanded" x-cloak class="grid grid-cols-2 gap-3 pl-7">
                             <div>
-                                <input type="text" name="name" placeholder="Full name (if new user)" value="{{ old('name') }}" class="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent/40" />
+                                <input type="text" name="name" placeholder="Full name (if new user)" value="{{ old('name') }}" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-accent/40" />
                                 @error('name')<p class="mt-1 text-[11px] text-red-400">{{ $message }}</p>@enderror
                             </div>
                             <div>
-                                <input type="password" name="password" placeholder="Password (if new user)" class="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 text-[13px] text-gray-300 placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-accent/40" />
+                                <input type="password" name="password" placeholder="Password (if new user)" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-accent/40" />
                                 @error('password')<p class="mt-1 text-[11px] text-red-400">{{ $message }}</p>@enderror
                             </div>
                         </div>
@@ -192,16 +192,16 @@
                                 @else bg-gray-500/15 text-gray-400 @endif">
                                 {{ $resource->type }}
                             </span>
-                            <span class="flex-1 text-[13px] text-white">{{ $resource->name }}</span>
+                            <span class="flex-1 text-[13px] text-gray-900">{{ $resource->name }}</span>
                             <svg class="w-3.5 h-3.5 text-gray-600 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </div>
 
-                        <div x-show="open" x-cloak class="border-t border-white/[0.04]" x-data="{ editing: false }">
+                        <div x-show="open" x-cloak class="border-t border-gray-100" x-data="{ editing: false }">
                             {{-- View mode --}}
                             <div x-show="!editing" class="px-5 py-4 space-y-3">
                                 <pre class="text-[12px] text-gray-400 whitespace-pre-wrap font-mono leading-relaxed">{{ $resource->content }}</pre>
                                 <div class="flex items-center gap-3 pt-1">
-                                    <button @click="editing = true" class="text-[12px] text-gray-500 hover:text-white transition">Edit</button>
+                                    <button @click="editing = true" class="text-[12px] text-gray-500 hover:text-gray-900 transition">Edit</button>
                                     <form method="POST" action="{{ route('projects.resources.destroy', [$project, $resource]) }}">
                                         @csrf
                                         @method('DELETE')
@@ -229,7 +229,7 @@
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition">Save</button>
-                                    <button type="button" @click="editing = false" class="text-[12px] text-gray-500 hover:text-white transition">Cancel</button>
+                                    <button type="button" @click="editing = false" class="text-[12px] text-gray-500 hover:text-gray-900 transition">Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -242,7 +242,7 @@
                         <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                         <span class="text-[13px] text-gray-500">Add resource...</span>
                     </div>
-                    <form method="POST" action="{{ route('projects.resources.store', $project) }}" x-show="creating" x-cloak class="border-t border-white/[0.04] px-5 py-4 space-y-3">
+                    <form method="POST" action="{{ route('projects.resources.store', $project) }}" x-show="creating" x-cloak class="border-t border-gray-100 px-5 py-4 space-y-3">
                         @csrf
                         <div class="grid grid-cols-2 gap-3">
                             <input type="text" name="name" required placeholder="Resource name" class="input-dark text-[13px] px-3 py-2" />
@@ -258,7 +258,7 @@
                         </div>
                         <div class="flex items-center gap-3">
                             <button type="submit" class="text-[12px] text-accent hover:text-accent-hover transition">Create Resource</button>
-                            <button type="button" @click="creating = false" class="text-[12px] text-gray-500 hover:text-white transition">Cancel</button>
+                            <button type="button" @click="creating = false" class="text-[12px] text-gray-500 hover:text-gray-900 transition">Cancel</button>
                         </div>
                     </form>
                 </div>

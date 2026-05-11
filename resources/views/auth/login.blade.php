@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <h2 class="text-lg font-semibold text-white mb-6">Sign in to Issues</h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-6">Sign in to Issues</h2>
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
@@ -20,7 +20,7 @@
 
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded bg-surface-700 border-white/10 text-accent focus:ring-accent/50" name="remember">
+                <input id="remember_me" type="checkbox" class="rounded bg-white border-gray-300 text-accent focus:ring-accent/50" name="remember">
                 <span class="ms-2 text-sm text-gray-400">{{ __('Remember me') }}</span>
             </label>
         </div>
@@ -33,7 +33,7 @@
 
         <div class="flex items-center justify-between mt-4 text-sm">
             @if (Route::has('password.request'))
-                <a class="text-gray-400 hover:text-white transition" href="{{ route('password.request') }}">
+                <a class="text-gray-500 hover:text-gray-800 transition" href="{{ route('password.request') }}">
                     {{ __('Forgot password?') }}
                 </a>
             @endif
