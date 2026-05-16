@@ -53,6 +53,12 @@ class Project extends Model
 
     public function nextTicketNumber(): int
     {
-        return $this->tickets()->count() + 1;
+        $lastIdentifier = $this->tickets()->orderBy('id', 'desc')->value('identifier');
+
+        if (!$lastIdentifier) {
+            return 1;
+        }
+
+        return ((int) explode('-', $lastIdentifier)[1]) + 1;
     }
 }
