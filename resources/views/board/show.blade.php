@@ -479,5 +479,62 @@
                 return (offset < 0 && offset > closest.offset) ? { offset, element: child } : closest;
             }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
+
+        // ── Board presence cursors ─────────────────────────────────
+        (function initPresence() {
+            if (!window.Echo) return;
+            const projectId = {{ $project->id }};
+            const cursorUrl = '{{ route('presence.cursor', $project) }}';
+            const csrfMeta  = document.querySelector('meta[name="csrf-token"]')?.content;
+            const cursors   = {};
+
+            function getCursorEl(userId, userName) {
+                if (cursors[userId]) return cursors[userId];
+                const el = document.createElement('div');
+                el.className = 'pointer-events-none fixed z-50 flex flex-col items-start';
+                el.innerHTML = `
+                    <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 0L0 16L4.5 12L7 18L9 17L6.5 11L12 11L0 0Z" fill="#6366f1"/>
+                    </svg>
+                    <span class="ml-3 -mt-1 px-1.5 py-0.5 rounded-md bg-indigo-600 text-white text-[10px] font-medium shadow whitespace-nowrap">${userName}</span>`;
+                document.body.appendChild(el);
+                cursors[userId] = el;
+                return el;
+            }
+
+            window.Echo.join(`board.${projectId}`)
+                .here(members => {
+                    // Members already on the board; cursors appear on first mousemove
+                })
+                .joining(member => {})
+                .leaving(member => {
+                    if (cursors[member.id]) {
+                        cursors[member.id].remove();
+                        delete cursors[member.id];
+                    }
+                })
+                .listen('CursorMoved', event => {
+                    if (event.user_id == {{ auth()->id() }}) return;
+                    const el = getCursorEl(event.user_id, event.user_name);
+                    el.style.transform = `translate(${event.position.x}px, ${event.position.y}px)`;
+                });
+
+            let throttleTimer = null;
+            document.addEventListener('mousemove', e => {
+                if (throttleTimer) return;
+                throttleTimer = setTimeout(() => {
+                    throttleTimer = null;
+                    fetch(cursorUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta },
+                        body: JSON.stringify({
+                            position: { x: e.clientX, y: e.clientY },
+                            ticket_id: null,
+                            column_id: null,
+                        }),
+                    });
+                }, 60); // ~16fps throttle
+            });
+        })();
     </script>
 </x-app-layout>

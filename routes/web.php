@@ -1,8 +1,17 @@
 <?php
 
 use App\Http\Controllers\BoardController;
+use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\ColumnController;
+use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\EpicController;
+use App\Http\Controllers\HuddleController;
+use App\Http\Controllers\AiController;
+use App\Http\Controllers\DocController;
+use App\Http\Controllers\DocFolderController;
+use App\Http\Controllers\WhiteboardController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
@@ -67,6 +76,52 @@ Route::middleware('auth')->group(function () {
     Route::put('/projects/{project}/epics/{epic}', [EpicController::class, 'update'])->name('epics.update');
     Route::delete('/projects/{project}/epics/{epic}', [EpicController::class, 'destroy'])->name('epics.destroy');
     Route::post('/projects/{project}/epics/{epic}/tickets', [EpicController::class, 'createTicket'])->name('epics.tickets.store');
+
+    // Messaging – channels
+    Route::get('/projects/{project}/channels', [ChannelController::class, 'index'])->name('channels.index');
+    Route::post('/projects/{project}/channels', [ChannelController::class, 'store'])->name('channels.store');
+    Route::get('/projects/{project}/channels/{channel}', [ChannelController::class, 'show'])->name('channels.show');
+    Route::delete('/projects/{project}/channels/{channel}', [ChannelController::class, 'destroy'])->name('channels.destroy');
+
+    // Messaging – messages
+    Route::post('/projects/{project}/channels/{channel}/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::delete('/projects/{project}/channels/{channel}/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    Route::get('/projects/{project}/channels/{channel}/messages/{message}/thread', [MessageController::class, 'thread'])->name('messages.thread');
+
+    // Messaging – direct messages
+    Route::get('/projects/{project}/dm/{user}', [DirectMessageController::class, 'show'])->name('dm.show');
+    Route::post('/projects/{project}/dm/{user}/messages', [DirectMessageController::class, 'store'])->name('dm.store');
+
+    // Board presence (cursor broadcast)
+    Route::post('/projects/{project}/presence/cursor', [PresenceController::class, 'cursor'])->name('presence.cursor');
+
+    // Huddle
+    Route::post('/projects/{project}/huddle/start', [HuddleController::class, 'start'])->name('huddle.start');
+    Route::post('/projects/{project}/huddle/{huddle}/leave', [HuddleController::class, 'leave'])->name('huddle.leave');
+    Route::post('/projects/{project}/huddle/signal', [HuddleController::class, 'signal'])->name('huddle.signal');
+
+    // AI
+    Route::post('/projects/{project}/ai/summarise', [AiController::class, 'summarise'])->name('ai.summarise');
+    Route::post('/projects/{project}/ai/ticket', [AiController::class, 'quickCreateTicket'])->name('ai.ticket.create');
+    Route::post('/projects/{project}/ai/doc', [AiController::class, 'startDoc'])->name('ai.doc.create');
+
+    // Docs
+    Route::get('/projects/{project}/docs/search', [DocController::class, 'search'])->name('docs.search');
+    Route::get('/projects/{project}/docs', [DocController::class, 'index'])->name('docs.index');
+    Route::get('/projects/{project}/docs/new', [DocController::class, 'create'])->name('docs.create');
+    Route::post('/projects/{project}/docs', [DocController::class, 'store'])->name('docs.store');
+    Route::get('/projects/{project}/docs/{doc}', [DocController::class, 'show'])->name('docs.show');
+    Route::get('/projects/{project}/docs/{doc}/edit', [DocController::class, 'edit'])->name('docs.edit');
+    Route::put('/projects/{project}/docs/{doc}', [DocController::class, 'update'])->name('docs.update');
+    Route::delete('/projects/{project}/docs/{doc}', [DocController::class, 'destroy'])->name('docs.destroy');
+
+    // Whiteboard sync
+    Route::post('/projects/{project}/docs/{doc}/whiteboard/sync', [WhiteboardController::class, 'sync'])->name('whiteboard.sync');
+
+    // Doc folders
+    Route::post('/projects/{project}/doc-folders', [DocFolderController::class, 'store'])->name('docs.folders.store');
+    Route::patch('/projects/{project}/doc-folders/{folder}', [DocFolderController::class, 'update'])->name('docs.folders.update');
+    Route::delete('/projects/{project}/doc-folders/{folder}', [DocFolderController::class, 'destroy'])->name('docs.folders.destroy');
 });
 
 require __DIR__.'/auth.php';

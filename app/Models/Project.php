@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
-    protected $fillable = ['name', 'key', 'description', 'owner_id'];
+    protected $fillable = ['name', 'key', 'description', 'owner_id', 'openai_api_key'];
+
+    protected $hidden = ['openai_api_key'];
 
     public function owner(): BelongsTo
     {
@@ -49,6 +51,26 @@ class Project extends Model
     public function activeSprint(): HasMany
     {
         return $this->hasMany(Sprint::class)->where('is_active', true);
+    }
+
+    public function channels(): HasMany
+    {
+        return $this->hasMany(Channel::class)->orderBy('name');
+    }
+
+    public function huddleSessions(): HasMany
+    {
+        return $this->hasMany(HuddleSession::class)->where('is_active', true);
+    }
+
+    public function docFolders(): HasMany
+    {
+        return $this->hasMany(DocFolder::class)->orderBy('position');
+    }
+
+    public function docs(): HasMany
+    {
+        return $this->hasMany(Doc::class)->orderBy('title');
     }
 
     public function nextTicketNumber(): int

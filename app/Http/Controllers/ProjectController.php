@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class ProjectController extends Controller
 {
@@ -38,6 +39,16 @@ class ProjectController extends Controller
             $project->columns()->create(['name' => $name, 'position' => $i]);
         }
 
+        // Create default #general channel
+        $channel = $project->channels()->create([
+            'name'       => 'general',
+            'slug'       => 'general',
+            'description' => 'General project discussion',
+            'is_private' => false,
+            'created_by' => auth()->id(),
+        ]);
+        $channel->members()->attach(auth()->id());
+
         return redirect()->route('projects.show', $project)->with('success', 'Project created.');
     }
 
@@ -60,13 +71,29 @@ class ProjectController extends Controller
         $this->authorize('update', $project);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'name'           => ['sometimes', 'required', 'string', 'max:255'],
+            'description'    => ['nullable', 'string'],
+            'openai_api_key' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $flashMessage = 'Project updated.';
+
+        if (array_key_exists('openai_api_key', $validated) && $validated['openai_api_key'] !== null) {
+            $validated['openai_api_key'] = Crypt::encryptString($validated['openai_api_key']);
+            $flashMessage = 'API key saved.';
+        } elseif (array_key_exists('openai_api_key', $validated) && $validated['openai_api_key'] === null) {
+            // Empty string submitted — don't overwrite existing key
+            unset($validated['openai_api_key']);
+        }
 
         $project->update($validated);
 
-        return redirect()->route('projects.show', $project)->with('success', 'Project updated.');
+        $with = ['success' => $flashMessage];
+        if (str_contains($flashMessage, 'API key')) {
+            $with['openai_success'] = 'OpenAI API key saved successfully.';
+        }
+
+        return redirect()->route('projects.show', $project)->with($with);
     }
 
     public function destroy(Project $project)

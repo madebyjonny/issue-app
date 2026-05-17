@@ -265,6 +265,46 @@
             </div>
         </div>
 
+        {{-- AI / OpenAI Key --}}
+        <div class="flex gap-8">
+            <div class="w-48 flex-shrink-0 pt-5">
+                <p class="section-title">AI Integration</p>
+                <p class="section-desc">Bring your own OpenAI key for AI features like message summarisation and ticket suggestions.</p>
+            </div>
+            <div class="flex-1 card-padded space-y-4">
+                @if (session('openai_success'))
+                <div class="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-lg px-3 py-2">
+                    {{ session('openai_success') }}
+                </div>
+                @endif
+                <form method="POST" action="{{ route('projects.update', $project) }}">
+                    @csrf
+                    @method('PATCH')
+                    <div class="space-y-3">
+                        <div>
+                            <label for="openai_api_key" class="block text-[12px] text-gray-500 mb-1">OpenAI API Key</label>
+                            <input type="password" id="openai_api_key" name="openai_api_key"
+                                   autocomplete="new-password"
+                                   placeholder="{{ $project->openai_api_key ? '••••••••••••••••••••••••••••' : 'sk-...' }}"
+                                   class="w-full bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.1] rounded-lg px-3 py-2 text-[13px] text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono" />
+                            <p class="text-[11px] text-gray-400 mt-1">Your key is stored encrypted and never exposed. Used for <em>gpt-4o-mini</em> calls only.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="submit" class="px-3.5 py-2 bg-indigo-600 text-white text-[13px] font-medium rounded-lg hover:bg-indigo-700 transition">
+                                Save API Key
+                            </button>
+                            @if($project->openai_api_key)
+                            <span class="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Key configured
+                            </span>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{-- Danger Zone --}}
         <div class="flex gap-8">
             <div class="w-48 flex-shrink-0 pt-5">
